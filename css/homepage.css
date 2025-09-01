@@ -1,70 +1,85 @@
+/* 🎨 Theme Variables */
+:root {
+  --font-family: 'Poppins', sans-serif;
+  --bg-page: #f8f9fa;
+  --bg-card: #ffffff;
+  --bg-card-header: linear-gradient(180deg, #f7f9fc 0%, #ffffff 100%);
+  --border-card: #eef0f3;
+  --border-hover: #e6e9ee;
+  --shadow-card: 0 6px 20px rgba(16, 24, 40, 0.08);
+  --shadow-hover: 0 10px 28px rgba(16, 24, 40, 0.12);
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #334155;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --badge-live-bg: #ecfdf5;
+  --badge-live-border: #bbf7d0;
+  --badge-live-text: #166534;
+  --badge-off-bg: #f1f5f9;
+  --badge-off-border: #e2e8f0;
+  --badge-off-text: #475569;
+  --radius-card: 16px;
+  --radius-btn: 10px;
+  --transition-fast: 160ms ease;
+  --transition-med: 220ms ease;
+}
+
+/* ===== Base ===== */
 html, body {
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-family);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
   padding: 0;
-  background: #f8f9fa;
+  background: var(--bg-page);
 }
 
 /* Typography weights */
-.marketplace-title {
-  font-weight: 1000; /* Bold for title */
-}
-
-.welcome-text {
-  font-weight: 600; /* Semi-bold for greeting */
-}
-
-.buyer-info {
-  font-weight: 400; /* Regular for secondary info */
-}
-
-.catalog-btn {
-  font-weight: 600; /* Semi-bold for CTA */
-}
+.marketplace-title { font-weight: 1000; }
+.welcome-text { font-weight: 600; }
+.buyer-info { font-weight: 400; }
+.catalog-btn { font-weight: 600; }
 
 /* ===== Seller Grid Layout ===== */
 #sellerContainer.seller-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 16px;
-
-  /* Center and constrain width */
+  gap: 1rem;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 1.25rem;
   box-sizing: border-box;
 }
 
 @media (max-width: 600px) {
   #sellerContainer.seller-grid {
-    padding: 15px;
-    gap: 12px;
+    padding: 0.9375rem;
+    gap: 0.75rem;
   }
 }
 
 /* ===== Seller Card ===== */
 .seller-card {
   position: relative;
-  background: #ffffff;
-  border: 1px solid #eef0f3;
-  border-radius: 16px;
-  box-shadow: 0 6px 20px rgba(16, 24, 40, 0.08);
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
   overflow: hidden;
-  transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+  transition: transform var(--transition-med), box-shadow var(--transition-med), border-color var(--transition-med);
 }
 
 .seller-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 28px rgba(16, 24, 40, 0.12);
-  border-color: #e6e9ee;
+  box-shadow: var(--shadow-hover);
+  border-color: var(--border-hover);
 }
 
 /* ===== Card Header & Avatar ===== */
 .seller-card-header {
   height: 56px;
-  background: linear-gradient(180deg, #f7f9fc 0%, #ffffff 100%);
+  background: var(--bg-card-header);
   position: relative;
 }
 
@@ -77,7 +92,7 @@ html, body {
   height: 72px;
   border-radius: 50%;
   background: #f0f4f8;
-  border: 3px solid #ffffff;
+  border: 3px solid var(--bg-card);
   box-shadow: 0 4px 14px rgba(16, 24, 40, 0.12);
   display: grid;
   place-items: center;
@@ -96,8 +111,8 @@ html, body {
   height: 100%;
   border-radius: 50%;
   font-weight: 700;
-  font-size: 18px;
-  color: #334155;
+  font-size: 1.125rem;
+  color: var(--text-muted);
   background: #e2e8f0;
   display: grid;
   place-items: center;
@@ -106,28 +121,28 @@ html, body {
 
 /* ===== Card Body ===== */
 .seller-card-body {
-  padding: 48px 16px 8px; /* space for avatar overlap */
+  padding: 48px 16px 8px;
   text-align: center;
 }
 
 .seller-name {
   margin: 0 0 6px;
-  font-size: 18px;
-  color: #0f172a;
+  font-size: 1.125rem;
+  color: var(--text-primary);
   font-weight: 700;
 }
 
 .seller-email {
   margin: 0 0 10px;
-  font-size: 13px;
-  color: #475569;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
   word-break: break-all;
 }
 
 .product-count {
   margin: 0;
-  font-size: 13px;
-  color: #334155;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
 }
 
 /* ===== Card Footer ===== */
@@ -143,7 +158,7 @@ html, body {
   gap: 8px;
   padding: 6px 10px;
   border-radius: 999px;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 600;
   width: max-content;
   margin: 0 auto;
@@ -151,15 +166,15 @@ html, body {
 }
 
 .live-badge.live {
-  color: #166534;
-  background: #ecfdf5;
-  border-color: #bbf7d0;
+  color: var(--badge-live-text);
+  background: var(--badge-live-bg);
+  border-color: var(--badge-live-border);
 }
 
 .live-badge.not-live {
-  color: #475569;
-  background: #f1f5f9;
-  border-color: #e2e8f0;
+  color: var(--badge-off-text);
+  background: var(--badge-off-bg);
+  border-color: var(--badge-off-border);
 }
 
 .live-dot {
@@ -175,19 +190,19 @@ html, body {
 .catalog-btn {
   width: 100%;
   padding: 10px 14px;
-  background: #2563eb;
+  background: var(--accent);
   color: #ffffff;
   border: none;
-  border-radius: 10px;
+  border-radius: var(--radius-btn);
   font-weight: 700;
-  font-size: 14px;
+  font-size: 0.875rem;
   cursor: pointer;
-  transition: background 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+  transition: background var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
 }
 
 .catalog-btn:hover {
-  background: #1d4ed8;
+  background: var(--accent-hover);
 }
 
 .catalog-btn:active {
@@ -207,16 +222,12 @@ html, body {
   justify-content: space-between;
   align-items: center;
   padding: 16px 24px;
-  background: #ffffff;
+  background: var(--bg-card);
   border-bottom: 1px solid #e2e8f0;
   box-shadow: 0 2px 8px rgba(16, 24, 40, 0.06);
 }
 
-.header-left {
-  display: flex;
-  align-items: center;
-}
-
+.header-left,
 .header-right {
   display: flex;
   align-items: center;
@@ -229,7 +240,7 @@ html, body {
 }
 
 .welcome-text {
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 600;
   color: #1e293b;
   margin: 0;
@@ -249,7 +260,7 @@ html, body {
 }
 
 .profile-btn:hover {
-  border-color: #2563eb;
+  border-color: var(--accent);
   transform: scale(1.05);
 }
 
