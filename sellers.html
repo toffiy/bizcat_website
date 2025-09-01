@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Buyer Dashboard</title>
+</head>
+<body>
+  <h2>Welcome, Buyer!</h2>
+  <p id="buyerInfo"></p>
+
+  <script type="module">
+    import { auth } from "./firebase/firebase_config.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js";
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        document.getElementById("buyerInfo").innerText = `UID: ${user.uid}, Email: ${user.email}`;
+      } else {
+        window.location.href = "login.html";
+      }
+    });
+  </script>
+</body>
+</html>

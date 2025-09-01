@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register Buyer | BizCat</title>
+  <style>
+body {
+  font-family: 'Poppins', sans-serif;
+  background: #f8f9fa;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.register-container {
+  background: #fff;
+  padding: 40px 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 14px; /* even spacing between all elements */
+}
+
+.register-container h2 {
+  margin-bottom: 5px;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.register-container input,
+.register-container .btn {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 1rem;
+  box-sizing: border-box; /* ensures padding doesn't change width */
+}
+
+.register-container input {
+  border: 1px solid #ccc;
+}
+
+.btn {
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.register-btn {
+  background: #0d6efd;
+  color: #fff;
+}
+.register-btn:hover {
+  background: #0b5ed7;
+}
+
+.back-btn {
+  background: #6c757d;
+  color: #fff;
+}
+.back-btn:hover {
+  background: #5a6268;
+}
+
+  </style>
+</head>
+<body>
+<div class="register-container">
+  <h2>Register Buyer</h2>
+
+  <input id="regFirstName" placeholder="First Name" />
+  <input id="regLastName" placeholder="Last Name" />
+  <input id="regEmail" type="email" placeholder="Email" />
+  <input id="regPassword" type="password" placeholder="Password" />
+  <input id="regAddress" placeholder="Address" />
+  <input id="regPhone" placeholder="Phone Number" />
+
+  <button class="btn register-btn" onclick="register()">Register</button>
+  <button id="backBtn" class="btn back-btn">← Back to Login</button>
+</div>
+
+
+  <script type="module">
+    import { auth, db } from './firebase/firebase_config.js';
+    import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+    import { setDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+    window.register = async function () {
+      const firstName = document.getElementById("regFirstName").value.trim();
+      const lastName = document.getElementById("regLastName").value.trim();
+      const email = document.getElementById("regEmail").value.trim();
+      const password = document.getElementById("regPassword").value.trim();
+      const address = document.getElementById("regAddress").value.trim();
+      const phone = document.getElementById("regPhone").value.trim();
+
+      if (!firstName || !lastName || !email || !password) {
+        alert("Please fill in all required fields.");
+        return;
+      }
+
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const uid = userCredential.user.uid;
+
+        await setDoc(doc(db, "buyers", uid), {
+          firstName,
+          lastName,
+          email,
+          address,
+          phone,
+          createdAt: serverTimestamp()
+        });
+
+        alert("Buyer registered successfully!");
+      } catch (error) {
+        console.error("Registration error:", error);
+        alert("Error: " + error.message);
+      }
+    };
+
+    document.getElementById("backBtn").addEventListener("click", () => {
+      window.location.href = "login.html";
+    });
+  </script>
+</body>
+</html>
