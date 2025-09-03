@@ -32,11 +32,11 @@ onAuthStateChanged(auth, async (user) => {
       if (buyer.photoURL) {
         profileImg.src = buyer.photoURL;
       } else {
-        profileImg.src = "default-avatar.png"; // fallback
+        profileImg.src = "assets/default-avatar.png"; // fallback
       }
     } else {
       welcomeText.textContent = `Welcome, ${user.email}!`;
-      profileImg.src = "default-avatar.png";
+      profileImg.src = "assets/default-avatar.png";
     }
 
     // Clicking the avatar goes to profile.html
