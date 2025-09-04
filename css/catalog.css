@@ -1,22 +1,188 @@
-.seller-card {
-  border: 1px solid #ccc;
-  padding: 12px;
-  margin-bottom: 20px;
-  border-radius: 8px;
-  background: #f9f9f9;
+/* ===== Theme Variables ===== */
+:root {
+  --font-family: 'Poppins', Arial, sans-serif;
+  --bg-page: #f9fafb;
+  --bg-card: #ffffff;
+  --border-card: #e5e7eb;
+  --shadow-card: 0 4px 12px rgba(0,0,0,0.05);
+  --shadow-hover: 0 8px 20px rgba(0,0,0,0.08);
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --accent: #2563eb;       /* Blue */
+  --accent-hover: #1d4ed8; /* Darker blue */
+  --radius-card: 14px;
+  --radius-btn: 8px;
+  --transition-fast: 160ms ease;
+  --transition-medium: 240ms ease;
 }
 
+/* ===== Base ===== */
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-page);
+  margin: 0;
+  padding: 20px;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+h2, h3 {
+  margin-bottom: 10px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+/* ===== Layout ===== */
+#product-list {
+  max-width: 1200px;
+  margin: auto;
+}
+
+#seller-products {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 24px;
+  padding: 20px 0;
+}
+
+/* ===== Product Card ===== */
 .product-card {
-  border: 1px solid #ddd;
-  padding: 10px;
-  border-radius: 6px;
-  text-align: center;
-  background: #fff;
-  margin-bottom: 15px;
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-card);
+  padding: 16px;
+  background-color: var(--bg-card);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform var(--transition-medium), box-shadow var(--transition-medium);
+  position: relative;
+  overflow: hidden;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
 }
 
 .product-card img {
-  max-width: 100%;
-  height: auto;
-  border-radius: 4px;
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  background-color: #f3f4f6;
+  transition: transform var(--transition-medium);
+}
+
+.product-card:hover img {
+  transform: scale(1.03);
+}
+
+.product-card h4 {
+  margin: 6px 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.product-card p {
+  font-size: 0.9rem;
+  text-align: center;
+  margin: 4px 0;
+  color: var(--text-secondary);
+}
+
+/* ===== Price Highlight ===== */
+.product-price {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-top: 4px;
+}
+
+/* ===== Stock Badge ===== */
+.stock-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background-color: rgba(0,0,0,0.75);
+  color: #fff;
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+/* ===== Buttons ===== */
+.product-card button {
+  margin-top: auto;
+  padding: 10px 16px;
+  background-color: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-btn);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: background-color var(--transition-fast), transform var(--transition-fast);
+  width: 100%;
+}
+
+.product-card button:hover:not(:disabled) {
+  background-color: var(--accent-hover);
+}
+
+.product-card button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.product-card button:disabled {
+  background-color: #d1d5db;
+  cursor: not-allowed;
+}
+
+/* ===== Back Button ===== */
+.back-button {
+  display: inline-block;
+  margin-bottom: 20px;
+  padding: 8px 14px;
+  background-color: #e5e7eb;
+  color: var(--text-primary);
+  text-decoration: none;
+  border-radius: var(--radius-btn);
+  font-weight: 600;
+  transition: background-color var(--transition-fast);
+}
+
+.back-button:hover {
+  background-color: #d1d5db;
+}
+
+/* ===== Responsive Tweaks ===== */
+@media (max-width: 768px) {
+  body {
+    padding: 16px;
+  }
+  #seller-products {
+    gap: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  #seller-products {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .product-card {
+    padding: 14px;
+  }
+  .product-card img {
+    height: 160px;
+  }
 }

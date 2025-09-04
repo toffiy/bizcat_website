@@ -57,6 +57,7 @@ onAuthStateChanged(auth, async (user) => {
         sortedProducts.push({ id: docSnap.id, ...docSnap.data() });
       });
 
+      // Sort: visible first
       sortedProducts.sort((a, b) => (b.isVisible === true ? 1 : -1) - (a.isVisible === true ? 1 : -1));
 
       sortedProducts.forEach(p => {
@@ -66,12 +67,15 @@ onAuthStateChanged(auth, async (user) => {
         card.style.border = "1px solid #ccc";
         card.style.padding = "10px";
         card.style.borderRadius = "8px";
-        card.style.opacity = p.isVisible ? "1" : "0.5";
+        card.style.opacity = p.isVisible && p.quantity > 0 ? "1" : "0.5";
 
         const imageUrl = p.imageUrl || "https://via.placeholder.com/250x150";
-        const buttonLabel = p.isVisible ? "Order Now" : "Not Available";
-        const buttonStyle = p.isVisible
-          ? 'background-color:#ffcc00; cursor:pointer;'
+
+        // ✅ Button condition: must be visible AND have stock
+        const isOrderable = p.isVisible && p.quantity > 0;
+        const buttonLabel = isOrderable ? "Order Now" : (p.quantity === 0 ? "Out of Stock" : "Not Available");
+        const buttonStyle = isOrderable
+          ? 'background-color:#2563eb; cursor:pointer;'
           : 'background-color:#ccc; cursor:not-allowed;';
 
         card.innerHTML = `
@@ -79,14 +83,14 @@ onAuthStateChanged(auth, async (user) => {
           <strong>${p.name || "Unnamed Product"}</strong><br>
           Price: ₱${p.price || 'N/A'}<br>
           Stock: ${p.quantity || 0}<br>
-          <button style="margin-top:10px; padding:8px 12px; border:none; border-radius:5px; font-weight:bold; ${buttonStyle}" ${p.isVisible ? "" : "disabled"}>${buttonLabel}</button>
+          <button style="margin-top:10px; padding:8px 12px; border:none; border-radius:5px; font-weight:bold; ${buttonStyle}" ${isOrderable ? "" : "disabled"}>${buttonLabel}</button>
         `;
 
         productsDiv.appendChild(card);
 
-        // ✅ Attach order modal trigger
+        // ✅ Attach order modal trigger only if orderable
         const orderBtn = card.querySelector("button");
-        if (p.isVisible && orderBtn) {
+        if (isOrderable && orderBtn) {
           orderBtn.addEventListener("click", () => {
             openOrderModal({
               buyerId: user.uid,
