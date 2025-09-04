@@ -306,6 +306,16 @@ html, body {
     font-size: 0.8125rem;
     padding: 8px 12px;
   }
+
+  /* 🆕 Stack welcome + first name vertically on small screens */
+  .welcome-block {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+  .welcome-text {
+    white-space: normal;
+  }
 }
 
 /* Very small devices (narrow phones) */

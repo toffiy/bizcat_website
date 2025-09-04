@@ -4,159 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My Profile</title>
-  <link rel="stylesheet" href="styles.css" />
-  <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: #f8f9fa;
-      margin: 0;
-      padding: 0;
-    }
-    .profile-container {
-      max-width: 800px;
-      margin: 40px auto;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-      padding: 30px;
-    }
-    .profile-header {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      border-bottom: 1px solid #eee;
-      padding-bottom: 20px;
-      margin-bottom: 20px;
-    }
-    .profile-avatar {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 3px solid #ddd;
-    }
-    .photo-upload {
-      display: none;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .photo-upload label {
-      font-weight: 600;
-      color: #555;
-    }
-    .profile-info {
-      display: grid;
-      grid-template-columns: 150px 1fr;
-      row-gap: 12px;
-      column-gap: 20px;
-    }
-    .profile-info label {
-      font-weight: 600;
-      color: #555;
-    }
-    .profile-info span, .profile-info input {
-      color: #333;
-    }
-    .profile-info input {
-      padding: 6px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 0.95rem;
-      width: 100%;
-    }
-    .btn {
-      margin-top: 30px;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: background 0.2s ease;
-    }
-    .edit-btn {
-      background: #0d6efd;
-      color: #fff;
-    }
-    .edit-btn:hover {
-      background: #0b5ed7;
-    }
-    .logout-btn {
-      background: #dc3545;
-      color: #fff;
-    }
-    .logout-btn:hover {
-      background: #b02a37;
-    }
-
-    /* Modal Styles */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 999;
-    }
-    .modal-window {
-      background: #fff;
-      padding: 20px 25px;
-      border-radius: 10px;
-      max-width: 400px;
-      width: 90%;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-      text-align: center;
-    }
-    .modal-window h3 {
-      margin-top: 0;
-      font-size: 1.3rem;
-    }
-    .modal-actions {
-      margin-top: 20px;
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-    }
-    .confirm-btn {
-      background: #0d6efd;
-      color: #fff;
-    }
-    .confirm-btn:hover {
-      background: #0b5ed7;
-    }
-    .cancel-btn {
-      background: #dc3545;
-      color: #fff;
-    }
-    .cancel-btn:hover {
-      background: #b02a37;
-    }
-        .back-btn {
-        background: #6c757d;          /* Neutral gray to match Bootstrap's secondary tone */
-        color: #fff;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 1rem;
-        transition: background 0.2s ease, transform 0.1s ease;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-        margin: 20px 0 0 20px;        /* space from edges */
-        }
-        .back-btn:hover {
-        background: #5a6268;          /* Slightly darker on hover */
-        transform: translateY(-1px);  /* Subtle lift effect */
-        }
-
-
-  </style>
+  <link rel="stylesheet" href="css/style.css" /> <!-- global styles -->
+  <link rel="stylesheet" href="css/profile.css" /> <!-- profile-specific styles -->
 </head>
 <body>
-<!-- Back Button -->
-<button id="backBtn" class="btn back-btn">← Back</button>
+  <!-- Back Button -->
+  <button id="backBtn" class="btn back-btn">← Back</button>
 
   <div class="profile-container">
     <!-- Profile Header -->
@@ -189,9 +42,13 @@
     <!-- Buttons -->
     <button id="editBtn" class="btn edit-btn">Edit Profile</button>
     <button id="logoutBtn" class="btn logout-btn">Log Out</button>
+
+    <!-- New Recent Orders Button -->
+    <a href="order.html" class="btn orders-btn">📦 Recent Orders</a>
   </div>
 
-    <div id="confirmModal" class="modal-overlay">
+  <!-- Confirm Modal -->
+  <div id="confirmModal" class="modal-overlay">
     <div class="modal-window">
       <h3>Confirm Update</h3>
       <p>Are you sure you want to update your profile?</p>
@@ -212,7 +69,8 @@
       </div>
     </div>
   </div>
-  <!-- Link to your JS -->
+
+  <!-- JS Logic -->
   <script type="module" src="./firebase/profile.js"></script>
 </body>
 </html>

@@ -14,21 +14,15 @@ export async function openOrderModal({ buyerId, sellerId, productId, productName
   let savedAddress = "";
   let productImage = "";
 
-  // 🔹 Fetch buyer's saved address
   try {
-    const buyerRef = doc(db, "buyers", buyerId);
-    const buyerSnap = await getDoc(buyerRef);
-    if (buyerSnap.exists()) {
-      savedAddress = buyerSnap.data().address || "";
-    }
+    const buyerSnap = await getDoc(doc(db, "buyers", buyerId));
+    if (buyerSnap.exists()) savedAddress = buyerSnap.data().address || "";
   } catch (err) {
     console.warn("Could not fetch buyer address:", err);
   }
 
-  // 🔹 Fetch product image
   try {
-    const productRef = doc(db, `sellers/${sellerId}/products/${productId}`);
-    const productSnap = await getDoc(productRef);
+    const productSnap = await getDoc(doc(db, `sellers/${sellerId}/products/${productId}`));
     if (productSnap.exists()) {
       const productData = productSnap.data();
       productImage = productData.imageUrl || "https://via.placeholder.com/250x150";
@@ -37,7 +31,6 @@ export async function openOrderModal({ buyerId, sellerId, productId, productName
     console.warn("Could not fetch product image:", err);
   }
 
-  // Create modal container
   const modal = document.createElement("div");
   modal.style.position = "fixed";
   modal.style.top = "0";
@@ -49,15 +42,25 @@ export async function openOrderModal({ buyerId, sellerId, productId, productName
   modal.style.alignItems = "center";
   modal.style.justifyContent = "center";
   modal.style.zIndex = "9999";
+  modal.style.padding = "10px"; // prevent edge collision
 
-  // Step 1: Quantity selection + product image
-modal.innerHTML = `
-    <div style="background:#fff;padding:20px;border-radius:10px;width:300px;text-align:center;">
+  // Step 1
+  modal.innerHTML = `
+    <div style="
+      background:#fff;
+      padding:20px;
+      border-radius:10px;
+      width:100%;
+      max-width:400px;
+      box-sizing:border-box;
+      text-align:center;
+      font-size:clamp(14px, 2.5vw, 16px);
+    ">
       <h3>Order: ${productName}</h3>
-      <img src="${productImage}" alt="${productName}" style="width:100%;height:180px;object-fit:cover;border-radius:8px;margin-bottom:10px;">
+      <img src="${productImage}" alt="${productName}" style="width:100%;height:auto;max-height:200px;object-fit:cover;border-radius:8px;margin-bottom:10px;">
       <p>Price: ₱${price}</p>
       <label>Quantity:</label>
-      <input type="number" id="order-qty" min="1" value="1" style="width:100%;margin-bottom:10px;">
+      <input type="number" id="order-qty" min="1" value="1" style="width:100%;margin-bottom:10px;font-size:inherit;padding:8px;box-sizing:border-box;">
       <div style="text-align:right;">
         <button id="cancel-order" style="margin-right:10px;">Cancel</button>
         <button id="next-step" style="background:#1d4ed8;color:white;padding:8px 12px;border:none;border-radius:5px;font-weight:bold;">Next</button>
@@ -66,10 +69,8 @@ modal.innerHTML = `
   `;
   document.body.appendChild(modal);
 
-  // Cancel closes modal
   modal.querySelector("#cancel-order").onclick = () => modal.remove();
 
-  // Next → Step 2
   modal.querySelector("#next-step").onclick = () => {
     const qty = parseInt(document.getElementById("order-qty").value);
     if (!qty || qty < 1) {
@@ -77,95 +78,100 @@ modal.innerHTML = `
       return;
     }
 
-    // Step 2: Address + Notes confirmation
-const safeAddress = (savedAddress || "")
-  .replace(/`/g, "\\`")
-  .replace(/\$\{/g, "\\${}");
+    const safeAddress = (savedAddress || "")
+      .replace(/`/g, "\\`")
+      .replace(/\$\{/g, "\\${}");
 
-modal.innerHTML = `
-  <div style="background:#fff;padding:20px;border-radius:10px;width:300px;">
-    <h3>Confirm Order</h3>
-    <p><strong>Product:</strong> ${productName}</p>
-    <p><strong>Quantity:</strong> ${qty}</p>
-    <label>Delivery Address:</label>
-    <textarea id="order-address" style="width:100%;margin-bottom:10px;">${safeAddress}</textarea>
-    <label>Notes (optional):</label>
-    <textarea id="order-notes" style="width:100%;margin-bottom:10px;"></textarea>
-    <div style="text-align:right;">
-      <button id="back-step" style="margin-right:10px;">Back</button>
-      <button id="confirm-order" style="background:#1d4ed8;color:white;padding:8px 12px;border:none;border-radius:5px;font-weight:bold;">Place Order</button>
-    </div>
-  </div>
-`;
+    modal.innerHTML = `
+      <div style="
+        background:#fff;
+        padding:20px;
+        border-radius:10px;
+        width:100%;
+        max-width:400px;
+        box-sizing:border-box;
+        font-size:clamp(14px, 2.5vw, 16px);
+      ">
+        <h3>Confirm Order</h3>
+        <p><strong>Product:</strong> ${productName}</p>
+        <p><strong>Quantity:</strong> ${qty}</p>
+        <label>Delivery Address:</label>
+        <textarea id="order-address" style="width:100%;margin-bottom:10px;font-size:inherit;padding:8px;box-sizing:border-box;">${safeAddress}</textarea>
+        <label>Notes (optional):</label>
+        <textarea id="order-notes" style="width:100%;margin-bottom:10px;font-size:inherit;padding:8px;box-sizing:border-box;"></textarea>
+        <div style="text-align:right;">
+          <button id="back-step" style="margin-right:10px;">Back</button>
+          <button id="confirm-order" style="background:#1d4ed8;color:white;padding:8px 12px;border:none;border-radius:5px;font-weight:bold;">Place Order</button>
+        </div>
+      </div>
+    `;
 
-    // Back → return to Step 1
     modal.querySelector("#back-step").onclick = () => {
       modal.remove();
       openOrderModal({ buyerId, sellerId, productId, productName, price });
     };
 
-    // Confirm → place order
-modal.querySelector("#confirm-order").onclick = async (e) => {
-  const confirmBtn = e.target;
-  confirmBtn.disabled = true;
-  confirmBtn.textContent = "Placing...";
+    modal.querySelector("#confirm-order").onclick = async (e) => {
+      const confirmBtn = e.target;
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = "Placing...";
 
-  const address = document.getElementById("order-address").value.trim();
-  const notes = document.getElementById("order-notes").value.trim();
+      const address = document.getElementById("order-address").value.trim();
+      const notes = document.getElementById("order-notes").value.trim();
 
-  if (!address) {
-    alert("Address is required.");
-    confirmBtn.disabled = false;
-    confirmBtn.textContent = "Place Order";
-    return;
-  }
+      if (!address) {
+        alert("Address is required.");
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = "Place Order";
+        return;
+      }
 
-  try {
-    await createOrder({ buyerId, sellerId, productId, qty, address, notes });
+      try {
+        await createOrder({ buyerId, sellerId, productId, qty, address, notes });
 
-    // Step 3: Success message inside modal
-      modal.innerHTML = `
-      <div style="background:#fff;padding:20px;border-radius:10px;width:300px;text-align:center;">
-        <h3 style="color:green;">✅ Order Placed!</h3>
-        <p>Your order for <strong>${productName}</strong> has been placed successfully.</p>
-        <p>Quantity: ${qty}</p>
-        <button id="close-success" style="margin-top:10px;background:#1d4ed8;color:white;padding:8px 12px;border:none;border-radius:5px;font-weight:bold;">Close</button>
-      </div>
-    `;
-    modal.querySelector("#close-success").onclick = () => modal.remove();
+        modal.innerHTML = `
+          <div style="
+            background:#fff;
+            padding:20px;
+            border-radius:10px;
+            width:100%;
+            max-width:400px;
+            box-sizing:border-box;
+            text-align:center;
+            font-size:clamp(14px, 2.5vw, 16px);
+          ">
+            <h3 style="color:green;">✅ Order Placed!</h3>
+            <p>Your order for <strong>${productName}</strong> has been placed successfully.</p>
+            <p>Quantity: ${qty}</p>
+            <button id="close-success" style="margin-top:10px;background:#1d4ed8;color:white;padding:8px 12px;border:none;border-radius:5px;font-weight:bold;">Close</button>
+          </div>
+        `;
+        modal.querySelector("#close-success").onclick = () => modal.remove();
 
-  } catch (err) {
-    console.error("Error creating order:", err);
-    alert(err.message || "Failed to place order.");
-    confirmBtn.disabled = false;
-    confirmBtn.textContent = "Place Order";
-  }
+      } catch (err) {
+        console.error("Error creating order:", err);
+        alert(err.message || "Failed to place order.");
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = "Place Order";
+      }
     };
   };
 }
 
-// 🔹 Firestore order creation
-// 🔹 Firestore order creation
 async function createOrder({ buyerId, sellerId, productId, qty, address, notes }) {
-  // 🔹 Fetch product
   const productRef = doc(db, `sellers/${sellerId}/products/${productId}`);
   const productSnap = await getDoc(productRef);
   if (!productSnap.exists()) throw new Error("Product not found.");
   const product = productSnap.data();
 
-  // 🔹 Check stock
   if (product.quantity < qty) throw new Error("Not enough stock available.");
 
-  // 🔹 Fetch buyer info
-  const buyerRef = doc(db, "buyers", buyerId);
-  const buyerSnap = await getDoc(buyerRef);
+  const buyerSnap = await getDoc(doc(db, "buyers", buyerId));
   if (!buyerSnap.exists()) throw new Error("Buyer not found.");
   const buyer = buyerSnap.data();
 
-  // 🔹 Deduct stock
   await updateDoc(productRef, { quantity: increment(-qty) });
 
-  // 🔹 Save order under seller
   await addDoc(collection(db, `sellers/${sellerId}/orders`), {
     buyerId,
     buyerFirstName: buyer.firstName || "",
@@ -173,7 +179,7 @@ async function createOrder({ buyerId, sellerId, productId, qty, address, notes }
     buyerEmail: buyer.email || "",
     buyerPhone: buyer.phone || "",
     buyerAddress: address,
-    buyerPhotoURL: buyer.photoURL || "", 
+    buyerPhotoURL: buyer.photoURL || "",
     productId,
     productName: product.name,
     productImage: product.imageUrl || "",
@@ -186,5 +192,3 @@ async function createOrder({ buyerId, sellerId, productId, qty, address, notes }
     lastUpdated: serverTimestamp()
   });
 }
-
-

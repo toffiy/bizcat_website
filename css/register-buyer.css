@@ -1,0 +1,66 @@
+body {
+  font-family: 'Poppins', sans-serif;
+  background: #f8f9fa;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.register-container {
+  background: #fff;
+  padding: 40px 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 14px; /* even spacing between all elements */
+}
+
+.register-container h2 {
+  margin-bottom: 5px;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.register-container input,
+.register-container .btn {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 1rem;
+  box-sizing: border-box; /* ensures padding doesn't change width */
+}
+
+.register-container input {
+  border: 1px solid #ccc;
+}
+
+.btn {
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.register-btn {
+  background: #0d6efd;
+  color: #fff;
+}
+
+.register-btn:hover {
+  background: #0b5ed7;
+}
+
+.back-btn {
+  background: #6c757d;
+  color: #fff;
+}
+
+.back-btn:hover {
+  background: #5a6268;
+}

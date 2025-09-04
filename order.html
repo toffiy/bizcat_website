@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Orders</title>
+  <link rel="stylesheet" href="css/my-orders.css">
+</head>
+<body>
+
+  <!-- Back Button -->
+  <button class="back-btn" onclick="window.history.back()">← Back</button>
+
+  <h2>My Orders</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Qty</th>
+        <th>Total</th>
+        <th>Status</th>
+        <th>Ordered On</th>
+        <th>Seller</th>
+      </tr>
+    </thead>
+    <tbody id="ordersTableBody">
+      <tr><td colspan="6" style="text-align:center;">Loading orders...</td></tr>
+    </tbody>
+  </table>
+
+  <script type="module" src="/firebase/my-orders.js"></script>
+</body>
+</html>
