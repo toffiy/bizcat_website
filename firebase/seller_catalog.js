@@ -1,5 +1,5 @@
 import { auth, db } from './firebase_config.js';
-import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 import {
   doc,
   getDoc,
@@ -10,8 +10,6 @@ import {
 
 const welcomeText = document.getElementById("welcomeText");
 const sellerContainer = document.getElementById("sellerContainer");
-const profileImg = document.getElementById("profileImg"); // avatar in header
-const profileBtn = document.getElementById("profileBtn"); // clickable avatar
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
@@ -27,24 +25,29 @@ onAuthStateChanged(auth, async (user) => {
     if (buyerSnap.exists()) {
       const buyer = buyerSnap.data();
       welcomeText.textContent = `Welcome, ${buyer.firstName || 'Buyer'}!`;
-
-      // Set profile image if available
-      if (buyer.photoURL) {
-        profileImg.src = buyer.photoURL;
-      } else {
-        profileImg.src = "assets/default-avatar.png"; // fallback
-      }
     } else {
       welcomeText.textContent = `Welcome, ${user.email}!`;
-      profileImg.src = "assets/default-avatar.png";
     }
 
-    // Clicking the avatar goes to profile.html
-    profileBtn.addEventListener("click", () => {
-      window.location.href = "profile.html";
-    });
+    // Hook up hamburger menu links
+    const profileLink = document.querySelector('.menu-dropdown li a[href="/profile"]');
+    const ordersLink = document.querySelector('.menu-dropdown li a[href="/orders"]');
 
-    // --- your existing seller listing logic below ---
+    if (profileLink) {
+      profileLink.addEventListener("click", (e) => {
+        e.preventDefault();
+        window.location.href = "profile.html";
+      });
+    }
+
+    if (ordersLink) {
+      ordersLink.addEventListener("click", (e) => {
+        e.preventDefault();
+        window.location.href = "orders.html";
+      });
+    }
+
+    // --- Seller listing logic ---
     onSnapshot(collection(db, "sellers"), async (sellersSnapshot) => {
       sellerContainer.innerHTML = "";
 

@@ -17,11 +17,19 @@
     </div>
 
     <div class="header-right">
-      <div class="welcome-block">
-        <p id="welcomeText" class="welcome-text">Welcome, John!</p>
-        <button id="profileBtn" class="profile-btn" aria-label="Buyer menu">
-          <img id="profileImg" src="./images/default-avatar.png" alt="Profile" />
+      <p id="welcomeText" class="welcome-text">Welcome, John!</p>
+
+      <!-- 🔹 Replaced profile image with hamburger menu -->
+      <div class="menu-container">
+        <button id="menuBtn" class="menu-btn" aria-label="Menu">
+          <span></span>
+          <span></span>
+          <span></span>
         </button>
+        <ul class="menu-dropdown">
+          <li><a href="/profile">Profile</a></li>
+          <li><a href="/orders">My Orders</a></li>
+        </ul>
       </div>
     </div>
   </header>
@@ -31,5 +39,22 @@
 
   <!-- ✅ Relative path to JS -->
   <script type="module" src="./firebase/seller_catalog.js"></script>
+
+  <!-- 🔹 Menu toggle script -->
+  <script>
+    const menuContainer = document.querySelector('.menu-container');
+    const menuBtn = document.getElementById('menuBtn');
+
+    menuBtn.addEventListener('click', () => {
+      menuContainer.classList.toggle('active');
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!menuContainer.contains(e.target)) {
+        menuContainer.classList.remove('active');
+      }
+    });
+  </script>
 </body>
 </html>
