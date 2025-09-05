@@ -10,6 +10,13 @@ const goToRegister = document.getElementById("goToRegister");
 const urlParams = new URLSearchParams(window.location.search);
 let redirectUrl = urlParams.get("redirect");
 
+// ✅ Debug message in console
+if (redirectUrl) {
+  console.log(`🛈 Redirect detected: User came here from ${redirectUrl}`);
+} else {
+  console.log("🛈 No redirect parameter — user came directly to login page.");
+}
+
 // If redirect is a relative path, make it absolute
 if (redirectUrl && !redirectUrl.startsWith("http")) {
   const base = window.location.origin + (window.location.pathname.includes("/") ? "/" : "");
@@ -26,12 +33,15 @@ loginForm.addEventListener("submit", async (e) => {
 
     // ✅ If redirect param exists, go there; otherwise go to index
     if (redirectUrl) {
+      console.log(`✅ Login successful — redirecting to ${redirectUrl}`);
       window.location.href = redirectUrl;
     } else {
+      console.log("✅ Login successful — redirecting to index.html");
       window.location.href = "index.html";
     }
 
   } catch (error) {
+    console.error("❌ Login failed:", error);
     errorMsg.textContent = "Login failed: " + error.message;
   }
 });
@@ -39,8 +49,10 @@ loginForm.addEventListener("submit", async (e) => {
 goToRegister.addEventListener("click", () => {
   // ✅ Pass redirect param to register page if it exists
   if (redirectUrl) {
+    console.log(`➡️ Going to register page with redirect: ${redirectUrl}`);
     window.location.href = `register.html?redirect=${encodeURIComponent(redirectUrl)}`;
   } else {
+    console.log("➡️ Going to register page without redirect");
     window.location.href = "register.html";
   }
 });
