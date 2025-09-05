@@ -1,18 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Product Catalog</title>
-  <!-- Link to external CSS -->
-  <link rel="stylesheet" href="css/catalog.css">
+
+  <!-- Font and Styles -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/catalog.css" />
 </head>
 <body>
+
+  <!-- Back Navigation -->
   <a href="index.html" class="back-button">← Back to Homepage</a>
 
+  <!-- Catalog Container -->
   <div id="product-list">
-    <!-- Seller info and products will be injected here by JS -->
+    <!-- Seller info and product cards will be injected here by JS -->
   </div>
 
+  <!-- Firebase Catalog Script -->
   <script type="module" src="./firebase/product_catalog.js"></script>
+
 </body>
 </html>
