@@ -2,6 +2,10 @@ import { auth, db } from './firebase_config.js';
 import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 import { setDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
+// ✅ Get redirect parameter from URL (if any)
+const urlParams = new URLSearchParams(window.location.search);
+const redirectUrl = urlParams.get("redirect");
+
 window.register = async function () {
   const firstName = document.getElementById("regFirstName").value.trim();
   const lastName = document.getElementById("regLastName").value.trim();
@@ -29,12 +33,24 @@ window.register = async function () {
     });
 
     alert("Buyer registered successfully!");
+
+    // ✅ After registration, go to redirect URL if provided
+    if (redirectUrl) {
+      window.location.href = redirectUrl;
+    } else {
+      window.location.href = "index.html"; // default buyer home
+    }
   } catch (error) {
     console.error("Registration error:", error);
     alert("Error: " + error.message);
   }
 };
 
+// ✅ Back button preserves redirect param if it exists
 document.getElementById("backBtn").addEventListener("click", () => {
-  window.location.href = "login.html";
+  if (redirectUrl) {
+    window.location.href = `login.html?redirect=${encodeURIComponent(redirectUrl)}`;
+  } else {
+    window.location.href = "login.html";
+  }
 });

@@ -14,8 +14,10 @@ const urlParams = new URLSearchParams(window.location.search);
 const sellerId = urlParams.get("seller");
 
 onAuthStateChanged(auth, async (user) => {
+  // ✅ If not logged in → redirect to login with redirect param
   if (!user) {
-    productList.innerHTML = "<p>Please log in to view products.</p>";
+    const currentUrl = window.location.pathname + window.location.search;
+    window.location.href = `login.html?redirect=${encodeURIComponent(currentUrl)}`;
     return;
   }
 
