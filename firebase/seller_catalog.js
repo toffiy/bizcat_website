@@ -36,7 +36,7 @@ onAuthStateChanged(auth, async (user) => {
     // --- Hook up hamburger menu links ---
     // More flexible selectors: match any href containing "profile" or "orders"
     const profileLink = document.querySelector('.menu-dropdown a[href*="profile"]');
-    const ordersLink  = document.querySelector('.menu-dropdown a[href*="orders"]');
+    const ordersLink  = document.querySelector('.menu-dropdown a[href*="order"]');
 
     if (profileLink) {
       profileLink.addEventListener("click", (e) => {
