@@ -1,3 +1,4 @@
+// login.js
 import { auth } from './firebase_config.js';
 import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
@@ -7,7 +8,13 @@ const goToRegister = document.getElementById("goToRegister");
 
 // ✅ Get redirect parameter from URL (if any)
 const urlParams = new URLSearchParams(window.location.search);
-const redirectUrl = urlParams.get("redirect");
+let redirectUrl = urlParams.get("redirect");
+
+// If redirect is a relative path, make it absolute
+if (redirectUrl && !redirectUrl.startsWith("http")) {
+  const base = window.location.origin + (window.location.pathname.includes("/") ? "/" : "");
+  redirectUrl = base + redirectUrl.replace(/^\/+/, "");
+}
 
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -23,6 +30,7 @@ loginForm.addEventListener("submit", async (e) => {
     } else {
       window.location.href = "index.html";
     }
+
   } catch (error) {
     errorMsg.textContent = "Login failed: " + error.message;
   }
