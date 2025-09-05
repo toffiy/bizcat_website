@@ -200,3 +200,24 @@ h2, h3 {
     font-size: 1.1rem;
   }
 }
+
+/* Extra small screens (older phones, very narrow) */
+@media (max-width: 380px) {
+  body {
+    font-size: 15px; /* larger base font */
+    padding: 10px;
+  }
+  .product-card {
+    padding: 12px;
+  }
+  .product-card h4 {
+    font-size: 1rem;
+  }
+  .product-card p {
+    font-size: 0.85rem;
+  }
+  .product-card button {
+    font-size: 0.95rem;
+    padding: 10px 14px;
+  }
+}

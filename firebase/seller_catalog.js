@@ -48,7 +48,7 @@ onAuthStateChanged(auth, async (user) => {
     if (ordersLink) {
       ordersLink.addEventListener("click", (e) => {
         e.preventDefault();
-        window.location.href = "orders.html";
+        window.location.href = "order.html";
       });
     }
 
