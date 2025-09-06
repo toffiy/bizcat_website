@@ -8,19 +8,27 @@
 </head>
 <body>
   <div class="login-container">
-    <h2>Login to BizCat</h2>
+  <h2>Login to BizCat</h2>
 
-    <form id="loginForm">
-      <input type="email" id="email" placeholder="Email" required />
-      <input type="password" id="password" placeholder="Password" required />
-      <button type="submit" class="login-btn">Login</button>
-    </form>
+  <form id="loginForm">
+    <input type="email" id="email" placeholder="Email" required />
+    <input type="password" id="password" placeholder="Password" required />
+    <button type="submit" class="login-btn">Login</button>
+  </form>
 
-    <p id="errorMsg"></p>
+  <p id="errorMsg"></p>
 
-    <p>Don't have an account?</p>
-    <button id="goToRegister" class="register-btn">Register Here</button>
-  </div>
+  <p>Don't have an account?</p>
+  <button id="goToRegister" class="register-btn">Register Here</button>
+  <p>Or</p>
+  <button id="googleLogin" class="google-btn">
+    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+        alt="Google logo"
+        style="height:20px;">
+    Sign in with Google
+  </button>
+
+
 
   <script type="module" src="./firebase/login.js"></script>
 </body>

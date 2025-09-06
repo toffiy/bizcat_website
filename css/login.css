@@ -61,3 +61,23 @@
       font-size: 0.9rem;
       font-weight: 500;
     }
+    .google-btn {
+      background: #fff;
+      color: #212529;
+      font-weight: 500;
+      border: 1px solid #ccc;
+      border-radius: 1px;
+      padding: 5px 5px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s ease, box-shadow 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;   
+      gap: 5px;
+    }
+
+        .google-btn:hover {
+      background: #f1f1f1;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
