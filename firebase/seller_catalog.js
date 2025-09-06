@@ -29,7 +29,7 @@ onAuthStateChanged(auth, async (user) => {
         const buyer = buyerSnap.data();
         welcomeText.textContent = `${buyer.firstName || 'Buyer'}!`;
       } else {
-        welcomeText.textContent = `${user.email}!`;
+        welcomeText.textContent = ` ${user.email}!`;
       }
     }
 

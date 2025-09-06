@@ -1,3 +1,4 @@
+/* Base styles */
 body {
   font-family: 'Poppins', sans-serif;
   background: #f8f9fa;
@@ -71,4 +72,75 @@ img.product-img {
 
 .back-btn:hover {
   background: #5a6268;
+}
+
+.details-btn {
+  background: #0d6efd;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s ease;
+}
+
+.details-btn:hover {
+  background: #0b5ed7;
+}
+
+.order-details td {
+  background-color: #f9f9f9;
+  border-top: 1px solid #ccc;
+  font-size: 0.9rem;
+  padding: 10px 15px;
+}
+
+/* Mobile responsiveness */
+@media screen and (max-width: 600px) {
+  table, thead, tbody, th, td, tr {
+    display: block;
+    width: 100%;
+  }
+
+  thead {
+    display: none;
+  }
+
+  tr {
+    margin-bottom: 15px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    padding: 10px;
+  }
+
+  td {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+  }
+
+  td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #555;
+  }
+
+  img.product-img {
+    width: 40px;
+    height: 40px;
+    margin-right: 6px;
+  }
+
+  .details-btn {
+    font-size: 0.85rem;
+    padding: 5px 10px;
+  }
+
+  .order-details td {
+    font-size: 0.85rem;
+    padding: 8px 12px;
+  }
 }

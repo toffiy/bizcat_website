@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My Orders</title>
-  <link rel="stylesheet" href="css/my-orders.css">
+  <link rel="stylesheet" href="css/my-orders.css" />
 </head>
 <body>
 
@@ -11,19 +12,18 @@
   <button class="back-btn" onclick="window.history.back()">← Back</button>
 
   <h2>My Orders</h2>
+
   <table>
     <thead>
       <tr>
         <th>Product</th>
-        <th>Qty</th>
         <th>Total</th>
         <th>Status</th>
-        <th>Ordered On</th>
-        <th>Seller</th>
+        <th>Details</th>
       </tr>
     </thead>
     <tbody id="ordersTableBody">
-      <tr><td colspan="6" style="text-align:center;">Loading orders...</td></tr>
+      <tr><td colspan="4" style="text-align:center;">Loading orders...</td></tr>
     </tbody>
   </table>
 
