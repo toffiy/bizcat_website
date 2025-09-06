@@ -10,7 +10,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 // Cache DOM references
-const welcomeText     = document.getElementById("welcomeText");
+const welcomeText     = document.getElementById("welcome-name");
 const sellerContainer = document.getElementById("sellerContainer");
 
 onAuthStateChanged(auth, async (user) => {
@@ -27,9 +27,9 @@ onAuthStateChanged(auth, async (user) => {
     if (welcomeText) {
       if (buyerSnap.exists()) {
         const buyer = buyerSnap.data();
-        welcomeText.textContent = `Welcome, ${buyer.firstName || 'Buyer'}!`;
+        welcomeText.textContent = `${buyer.firstName || 'Buyer'}!`;
       } else {
-        welcomeText.textContent = `Welcome, ${user.email}!`;
+        welcomeText.textContent = `${user.email}!`;
       }
     }
 
