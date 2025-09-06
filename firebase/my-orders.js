@@ -37,6 +37,7 @@ async function loadOrders(userId) {
 
       const orderDate = order.timestamp?.toDate?.().toLocaleString() || "N/A";
 
+      // Main row
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td data-label="Product">
@@ -54,16 +55,24 @@ async function loadOrders(userId) {
         </td>
       `;
 
+      // Details row
       const detailsRow = document.createElement("tr");
       detailsRow.classList.add("order-details");
-      detailsRow.style.display = "none";
       detailsRow.innerHTML = `
         <td colspan="4">
-          <strong>Quantity:</strong> ${order.quantity || 0}<br>
-          <strong>Ordered On:</strong> ${orderDate}<br>
-          <strong>Seller:</strong> ${sellerName}
+          <div class="details-content">
+            <strong>Quantity:</strong> ${order.quantity || 0}<br>
+            <strong>Ordered On:</strong> ${orderDate}<br>
+            <strong>Seller:</strong> ${sellerName}
+          </div>
         </td>
       `;
+
+      // Initial hidden state
+      detailsRow.querySelector(".details-content").style.height = "0px";
+      detailsRow.querySelector(".details-content").style.overflow = "hidden";
+      detailsRow.querySelector(".details-content").style.opacity = "0";
+      detailsRow.querySelector(".details-content").style.transition = "height 0.3s ease, opacity 0.3s ease";
 
       tableBody.appendChild(tr);
       tableBody.appendChild(detailsRow);
@@ -79,13 +88,33 @@ async function loadOrders(userId) {
   }
 }
 
+// Animate expand/collapse
 window.toggleDetails = function(button) {
   const detailsRow = button.closest("tr").nextElementSibling;
-  const isVisible = detailsRow.style.display === "table-row";
-  detailsRow.style.display = isVisible ? "none" : "table-row";
-  button.textContent = isVisible ? "View" : "Hide";
+  const content = detailsRow.querySelector(".details-content");
+  const isExpanded = content.style.height !== "0px";
+
+  if (isExpanded) {
+    content.style.height = content.scrollHeight + "px"; // set current height
+    requestAnimationFrame(() => {
+      content.style.height = "0px";
+      content.style.opacity = "0";
+      button.textContent = "View";
+    });
+  } else {
+    content.style.height = "auto";
+    const fullHeight = content.scrollHeight + "px";
+    content.style.height = "0px";
+    content.style.opacity = "0";
+    requestAnimationFrame(() => {
+      content.style.height = fullHeight;
+      content.style.opacity = "1";
+      button.textContent = "Hide";
+    });
+  }
 };
 
+// Auth listener
 onAuthStateChanged(auth, (user) => {
   if (user) {
     loadOrders(user.uid);
