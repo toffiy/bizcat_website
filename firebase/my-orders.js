@@ -37,7 +37,6 @@ async function loadOrders(userId) {
 
       const orderDate = order.timestamp?.toDate?.().toLocaleString() || "N/A";
 
-      // Main row (minimal view)
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td data-label="Product">
@@ -55,7 +54,6 @@ async function loadOrders(userId) {
         </td>
       `;
 
-      // Hidden row (full details)
       const detailsRow = document.createElement("tr");
       detailsRow.classList.add("order-details");
       detailsRow.style.display = "none";
@@ -81,7 +79,6 @@ async function loadOrders(userId) {
   }
 }
 
-// Toggle visibility of details row
 window.toggleDetails = function(button) {
   const detailsRow = button.closest("tr").nextElementSibling;
   const isVisible = detailsRow.style.display === "table-row";
@@ -89,10 +86,8 @@ window.toggleDetails = function(button) {
   button.textContent = isVisible ? "View" : "Hide";
 };
 
-// Auth listener
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    console.log("Logged in as:", user.uid);
     loadOrders(user.uid);
   } else {
     document.getElementById("ordersTableBody").innerHTML =
