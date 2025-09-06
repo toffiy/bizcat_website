@@ -8,27 +8,18 @@
 </head>
 <body>
 
+  <!-- Header -->
   <header class="page-header">
     <button class="back-btn" onclick="window.history.back()">← Back</button>
     <h2>My Orders</h2>
   </header>
 
-  <section class="orders-section">
-    <table class="orders-table">
-      <thead>
-        <tr>
-          <th>Product</th>
-          <th>Total</th>
-          <th>Status</th>
-          <th>Details</th>
-        </tr>
-      </thead>
-      <tbody id="ordersTableBody">
-        <tr><td colspan="4" style="text-align:center;">Loading orders...</td></tr>
-      </tbody>
-    </table>
+  <!-- Orders Container -->
+  <section id="ordersContainer" class="orders-container">
+    <p class="loading-text">Loading orders...</p>
   </section>
 
+  <!-- Firebase Logic -->
   <script type="module" src="./firebase/my-orders.js"></script>
 </body>
 </html>

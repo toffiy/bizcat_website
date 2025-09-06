@@ -13,19 +13,16 @@ body {
 /* Header */
 .page-header {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 20px;
   text-align: center;
 }
-
 .page-header h2 {
-  flex: 1 1 100%;
   font-size: 1.5rem;
   margin: 0;
 }
-
 
 /* Back button */
 .back-btn {
@@ -42,45 +39,53 @@ body {
   background: #5a6268;
 }
 
-/* Table */
-.orders-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: #fff;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-}
-.orders-table th {
-  background: #0d6efd;
-  color: #fff;
-  padding: 14px;
-  font-size: 0.95rem;
-  text-align: left;
-}
-.orders-table td {
-  padding: 14px;
-  vertical-align: middle;
-}
-.orders-table tr:nth-child(even) {
-  background: #f8f9fa;
+/* Orders container */
+.orders-container {
+  display: grid;
+  gap: 16px;
 }
 
-/* Product image */
-img.product-img {
-  width: 48px;
-  height: 48px;
+/* Order card */
+.order-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: transform 0.2s ease;
+}
+.order-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Header inside card */
+.order-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.product-img {
+  width: 60px;
+  height: 60px;
   object-fit: cover;
-  border-radius: 6px;
-  margin-right: 10px;
-  vertical-align: middle;
+  border-radius: 8px;
+}
+.order-info {
+  flex: 1;
+}
+.order-info h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
 }
 
 /* Status badge */
 .status-badge {
-  padding: 6px 10px;
+  padding: 4px 10px;
   border-radius: 12px;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
   text-transform: capitalize;
   display: inline-block;
@@ -90,62 +95,50 @@ img.product-img {
 .status-delivered { background: #d4edda; color: #155724; }
 .status-cancelled { background: #f8d7da; color: #721c24; }
 
-/* Details button */
+/* Details section */
+.order-details {
+  font-size: 0.9rem;
+  color: #495057;
+  line-height: 1.5;
+}
+
+/* View button */
 .details-btn {
+  align-self: flex-start;
   background: #0d6efd;
   color: #fff;
   border: none;
   padding: 6px 12px;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   transition: background 0.2s ease;
 }
 .details-btn:hover {
   background: #0b5ed7;
 }
 
-/* Expanded row */
-.order-details td {
-  background-color: #f1f3f5;
-  border-top: 1px solid #dee2e6;
-  font-size: 0.9rem;
-  padding: 12px 16px;
+/* Loading text */
+.loading-text {
+  text-align: center;
+  font-size: 1rem;
+  color: #6c757d;
 }
 
-/* Mobile layout */
+/* Mobile tweaks */
 @media screen and (max-width: 600px) {
-  .orders-table, thead, tbody, th, td, tr {
-    display: block;
-    width: 100%;
-  }
-
-  thead {
-    display: none;
-  }
-
-  tr {
-    margin-bottom: 16px;
-    background: #fff;
+  .order-card {
+    padding: 14px;
     border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    padding: 12px;
   }
 
-  td {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
-    padding: 10px;
-    border-bottom: 1px solid #eee;
+  .product-img {
+    width: 50px;
+    height: 50px;
   }
 
-  td::before {
-    content: attr(data-label);
-    font-weight: 600;
-    color: #495057;
-    margin-bottom: 4px;
+  .order-info h3 {
+    font-size: 0.95rem;
   }
 
   .details-btn {
@@ -155,25 +148,31 @@ img.product-img {
     padding: 8px;
   }
 
-  img.product-img {
-    width: 40px;
-    height: 40px;
-  }
-
-  .order-details td {
-    font-size: 0.85rem;
-    padding: 10px;
-  }
   .order-details {
-  height: 0;
-  overflow: hidden;
-  opacity: 0;
-  transition: height 0.3s ease, opacity 0.3s ease;
+    font-size: 0.85rem;
+  }
+}
+.status-paid {
+  background: #d4edda; /* soft green */
+  color: #155724;
 }
 
-.order-details.expanded {
-  height: auto; /* JS will set exact height */
-  opacity: 1;
+.status-shipped {
+  background: #cce5ff; /* soft blue */
+  color: #004085;
 }
 
+.status-pending {
+  background: #fff3cd; /* soft yellow */
+  color: #856404;
+}
+
+.status-cancelled {
+  background: #f8d7da; /* soft red */
+  color: #721c24;
+}
+
+.status-default {
+  background: #e2e3e5; /* soft gray */
+  color: #6c757d;
 }
