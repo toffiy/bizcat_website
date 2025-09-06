@@ -48,7 +48,7 @@ onAuthStateChanged(auth, async (user) => {
       originalData = buyerSnap.data();
       renderProfile(originalData);
     } else {
-      originalData = { email: user.email, photoURL: "default-avatar.png" };
+      originalData = { email: user.email, photoURL: "/default-avatar.png" };
       renderProfile(originalData);
     }
   } catch (err) {
@@ -63,7 +63,7 @@ function renderProfile(buyer) {
   emailView.textContent = buyer.email || '';
   phoneView.textContent = buyer.phone || '';
   addressView.textContent = buyer.address || '';
-  profileImg.src = buyer.photoURL || "default-avatar.png";
+  profileImg.src = buyer.photoURL || "assets/default-avatar.png";
 }
 
 editBtn.addEventListener('click', () => {

@@ -16,10 +16,11 @@ const sellerId = urlParams.get("seller");
 onAuthStateChanged(auth, async (user) => {
   // ✅ If not logged in → redirect to login with redirect param
   if (!user) {
-    const currentUrl = window.location.pathname + window.location.search;
-    window.location.href = `login.html?redirect=${encodeURIComponent(currentUrl)}`;
-    return;
+  const currentUrl = window.location.href; // full URL
+  window.location.href = `login.html?redirect=${encodeURIComponent(currentUrl)}`;
+  return;
   }
+
 
   if (!sellerId) {
     productList.innerHTML = "<p>No seller selected.</p>";

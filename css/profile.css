@@ -166,16 +166,3 @@ body {
   background: #5a6268;
   transform: translateY(-1px);
 }
-
-.orders-btn {
-  display: inline-block;
-  background: #198754;
-  color: #fff;
-  text-align: center;
-  text-decoration: none;
-  margin-left: 10px;
-}
-
-.orders-btn:hover {
-  background: #157347;
-}

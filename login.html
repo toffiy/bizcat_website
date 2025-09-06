@@ -4,71 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login | BizCat</title>
-  <link rel="stylesheet" href="/css/style.css" />
-  <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: #f8f9fa;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-    }
-    .login-container {
-      background: #fff;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-      max-width: 400px;
-      width: 100%;
-      text-align: center;
-    }
-    .login-container h2 {
-      margin-bottom: 20px;
-      font-size: 1.5rem;
-      color: #333;
-    }
-    .login-container form {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-    .login-container input {
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 1rem;
-    }
-    .login-container button {
-      padding: 10px;
-      border: none;
-      border-radius: 6px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background 0.2s ease;
-    }
-    .login-btn {
-      background: #0d6efd;
-      color: #fff;
-    }
-    .login-btn:hover {
-      background: #0b5ed7;
-    }
-    .register-btn {
-      background: #6c757d;
-      color: #fff;
-    }
-    .register-btn:hover {
-      background: #5a6268;
-    }
-    #errorMsg {
-      color: red;
-      margin-top: 10px;
-      font-size: 0.9rem;
-    }
-  </style>
+  <link rel="stylesheet" href="/css/login.css" />
 </head>
 <body>
   <div class="login-container">
@@ -86,63 +22,6 @@
     <button id="goToRegister" class="register-btn">Register Here</button>
   </div>
 
-<script type="module">
-import { auth } from './firebase/firebase_config.js';
-import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-
-const loginForm = document.getElementById("loginForm");
-const errorMsg = document.getElementById("errorMsg");
-const goToRegister = document.getElementById("goToRegister");
-
-console.log("🛈 Login script loaded, attaching event listeners...");
-
-// Get redirect parameter
-const urlParams = new URLSearchParams(window.location.search);
-let redirectUrl = urlParams.get("redirect");
-
-if (redirectUrl) {
-  console.log(`🛈 Redirect detected: ${redirectUrl}`);
-  if (!redirectUrl.startsWith("http")) {
-    redirectUrl = new URL(redirectUrl, window.location.origin).href;
-  }
-} else {
-  console.log("🛈 No redirect parameter — direct login.");
-}
-
-loginForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  console.log("🛈 Login form submitted");
-
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value;
-
-  try {
-    const userCred = await signInWithEmailAndPassword(auth, email, password);
-    console.log(`✅ Login successful for UID: ${userCred.user.uid}`);
-
-    if (redirectUrl) {
-      console.log(`➡️ Redirecting to: ${redirectUrl}`);
-      window.location.href = redirectUrl;
-    } else {
-      console.log("➡️ Redirecting to index.html");
-      window.location.href = "index.html";
-    }
-  } catch (error) {
-    console.error("❌ Login failed:", error);
-    errorMsg.textContent = "Login failed: " + error.message;
-  }
-});
-
-goToRegister.addEventListener("click", () => {
-  if (redirectUrl) {
-    console.log(`➡️ Going to register page with redirect: ${redirectUrl}`);
-    window.location.href = `register.html?redirect=${encodeURIComponent(redirectUrl)}`;
-  } else {
-    console.log("➡️ Going to register page without redirect");
-    window.location.href = "register.html";
-  }
-});
-</script>
- 
+  <script type="module" src="./firebase/login.js"></script>
 </body>
 </html>

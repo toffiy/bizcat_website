@@ -41,10 +41,11 @@ html, body {
 }
 
 /* Typography weights */
-.marketplace-title { font-weight: 1000; }
-.welcome-text { font-weight: 600; }
+.marketplace-title { font-weight: 700; }
+.welcome-text { font-weight: 500; }
 .buyer-info { font-weight: 400; }
-.catalog-btn { font-weight: 600; }
+.catalog-btn { font-weight: 500; }
+.available-seller{ font-weight: 650;}
 
 /* ===== Seller Grid Layout ===== */
 #sellerContainer.seller-grid {
@@ -235,15 +236,14 @@ html, body {
   font-size: 1rem;
   font-weight: 600;
   color: #1e293b;
-  margin: 0;
+  margin: 1rem;
   white-space: nowrap;
 }
 
 /* ===== HAMBURGER MENU ===== */
+/* ===== HAMBURGER MENU ===== */
 .menu-container {
-  position: fixed;
-  top: 16px;
-  right: 16px;
+  position: relative;
   z-index: 1000;
 }
 
@@ -254,7 +254,7 @@ html, body {
   width: 28px;
   height: 20px;
   background: none;
-  border: none;
+  border: 1rem;
   cursor: pointer;
   padding: 0;
 }
@@ -267,34 +267,40 @@ html, body {
   transition: background-color var(--transition-fast);
 }
 
+/* ===== DROPDOWN MENU ===== */
 .menu-dropdown {
-  display: none;
   position: absolute;
-  top: 36px;
+  top: calc(100% + 8px); /* space below button */
   right: 0;
   background: var(--bg-card);
   border: 1px solid var(--border-card);
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  border-radius: 8px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.08);
   list-style: none;
   padding: 8px 0;
   margin: 0;
-  min-width: 140px;
+  min-width: 160px;
+  display: none;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.menu-container.active .menu-dropdown {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .menu-dropdown li a {
   display: block;
-  padding: 8px 16px;
+  padding: 10px 16px;
   text-decoration: none;
   color: var(--text-primary);
-  font-size: 14px;
+  font-size: 0.875rem;
+  transition: background-color var(--transition-fast);
 }
 
 .menu-dropdown li a:hover {
   background-color: var(--badge-off-bg);
 }
-
-.menu-container.active .menu-dropdown {
-  display: block;
-}
-

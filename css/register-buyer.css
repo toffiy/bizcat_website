@@ -34,7 +34,7 @@ body {
   padding: 10px;
   border-radius: 6px;
   font-size: 1rem;
-  box-sizing: border-box; /* ensures padding doesn't change width */
+  box-sizing: border-box;
 }
 
 .register-container input {
@@ -64,3 +64,21 @@ body {
 .back-btn:hover {
   background: #5a6268;
 }
+
+/* 🔴 Inline error message styling */
+.field-error {
+  font-size: 0.75rem;
+  color: #e53935;
+  text-align: left;
+  margin-top: 4px;
+  margin-bottom: -8px;
+  padding-left: 2px;
+  font-weight: 500;
+  transition: opacity 0.2s ease-in-out;
+  opacity: 1;
+}
+
+.field-error:empty {
+  opacity: 0;
+}
+

@@ -166,34 +166,58 @@ h2, h3 {
   background-color: #d1d5db;
 }
 
-/* ===== Responsive Tweaks ===== */
-@media (max-width: 480px) {
-  .product-card {
-    padding: 18px;
+/* ===== Responsive Layout Fix ===== */
+@media (max-width: 600px) {
+  #seller-products {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
   }
+
+  .product-card {
+    width: 100%;
+    max-width: 100%;
+    padding: 18px;
+    font-size: 1rem;
+  }
+
+  .product-card h4 {
+    font-size: 1.25rem;
+  }
+
+  .product-card p {
+    font-size: 0.95rem;
+  }
+
   .product-card button {
     font-size: 1rem;
     padding: 12px 18px;
   }
-  .product-card h4 {
-    font-size: 1.2rem;
+
+  .product-card img {
+    max-height: 200px;
   }
 }
 
+/* ===== Extra Small Devices ===== */
 @media (max-width: 380px) {
   body {
     font-size: 15px;
     padding: 10px;
   }
+
   .product-card {
     padding: 16px;
   }
+
   .product-card h4 {
     font-size: 1.1rem;
   }
+
   .product-card p {
     font-size: 0.85rem;
   }
+
   .product-card button {
     font-size: 0.95rem;
     padding: 10px 14px;
