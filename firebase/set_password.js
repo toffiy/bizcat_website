@@ -4,7 +4,7 @@ import {
   EmailAuthProvider,
   linkWithCredential,
   RecaptchaVerifier,
-  signInWithPhoneNumber
+  linkWithPhoneNumber
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 import {
   doc,
@@ -14,10 +14,13 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 const errorMsg = document.getElementById("errorMsg");
+const showErr = (m) => { if (errorMsg) errorMsg.textContent = m; };
 
-// Detect which page we are on
-if (document.getElementById("sendOtpBtn")) {
-  // ===== PHONE VERIFICATION PAGE =====
+const isVerifyPhone = !!document.getElementById("sendOtpBtn");
+const isSetPassword = !!document.getElementById("submitPassword");
+
+// ===== PHONE VERIFICATION PAGE =====
+if (isVerifyPhone) {
   const phoneInput = document.getElementById("phoneNumber");
   const sendOtpBtn = document.getElementById("sendOtpBtn");
   const otpInput = document.getElementById("otpCode");
@@ -25,42 +28,48 @@ if (document.getElementById("sendOtpBtn")) {
 
   let confirmationResult;
 
-  window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { size: 'normal' });
-
-  sendOtpBtn.addEventListener("click", async () => {
-    const phoneNumber = phoneInput.value.trim();
-    if (!phoneNumber) {
-      errorMsg.textContent = "Enter your phone number.";
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      showErr("Please sign in first.");
+      sendOtpBtn.disabled = true;
+      verifyOtpBtn.disabled = true;
       return;
     }
+    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { size: 'normal' });
+  });
+
+  // Send OTP to whatever number is typed
+  sendOtpBtn.addEventListener("click", async () => {
+    const phoneNumber = phoneInput.value.trim();
+    if (!phoneNumber) return showErr("Enter your phone number.");
+    if (!phoneNumber.startsWith("+")) return showErr("Use E.164 format, e.g., +639123456789");
+
     try {
-      confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, window.recaptchaVerifier);
-      errorMsg.textContent = "OTP sent to your phone.";
+      const user = auth.currentUser;
+      confirmationResult = await linkWithPhoneNumber(user, phoneNumber, window.recaptchaVerifier);
+      showErr("OTP sent to " + phoneNumber);
     } catch (error) {
-      errorMsg.textContent = "Error sending OTP: " + error.message;
+      showErr("Error sending OTP: " + error.message);
     }
   });
 
+  // Verify OTP
   verifyOtpBtn.addEventListener("click", async () => {
     const code = otpInput.value.trim();
-    if (!code) {
-      errorMsg.textContent = "Enter the OTP.";
-      return;
-    }
+    if (!code) return showErr("Enter the OTP.");
     try {
       await confirmationResult.confirm(code);
       sessionStorage.setItem("phoneVerified", "true");
       sessionStorage.setItem("verifiedPhone", phoneInput.value.trim());
       window.location.href = "set_password.html";
     } catch (error) {
-      errorMsg.textContent = "Invalid OTP: " + error.message;
+      showErr("Invalid OTP: " + error.message);
     }
   });
+}
 
-} else if (document.getElementById("submitPassword")) {
-  // ===== PASSWORD PAGE =====
-
-  // 🚨 SAFEGUARD: Redirect if phone not verified
+// ===== PASSWORD PAGE =====
+if (isSetPassword) {
   if (sessionStorage.getItem("phoneVerified") !== "true") {
     window.location.href = "verify_phone.html";
   }
@@ -82,25 +91,18 @@ if (document.getElementById("sendOtpBtn")) {
   submitBtn.addEventListener("click", async () => {
     const pw = passwordInput.value.trim();
     const confirm = confirmInput.value.trim();
-    errorMsg.textContent = "";
+    showErr("");
 
-    if (pw !== confirm) {
-      errorMsg.textContent = "Passwords do not match.";
-      return;
-    }
-
+    if (pw !== confirm) return showErr("Passwords do not match.");
     const issues = validatePassword(pw);
-    if (issues.length) {
-      errorMsg.textContent = issues.join(" ");
-      return;
-    }
+    if (issues.length) return showErr(issues.join(" "));
 
     submitBtn.disabled = true;
     submitBtn.textContent = "Saving...";
 
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        errorMsg.textContent = "You must be logged in to set a password.";
+        showErr("You must be logged in to set a password.");
         submitBtn.disabled = false;
         submitBtn.textContent = "Set Password";
         return;
@@ -109,9 +111,8 @@ if (document.getElementById("sendOtpBtn")) {
       const uid = user.uid;
       const buyerRef = doc(db, "buyers", uid);
       const snapshot = await getDoc(buyerRef);
-
       if (!snapshot.exists()) {
-        errorMsg.textContent = "Buyer profile not found.";
+        showErr("Buyer profile not found.");
         submitBtn.disabled = false;
         submitBtn.textContent = "Set Password";
         return;
@@ -127,13 +128,12 @@ if (document.getElementById("sendOtpBtn")) {
           updatedAt: serverTimestamp()
         }, { merge: true });
 
-        // Clear session storage after success
         sessionStorage.removeItem("phoneVerified");
         sessionStorage.removeItem("verifiedPhone");
 
         window.location.href = "index.html";
       } catch (error) {
-        errorMsg.textContent = "Failed to set password. Try again.";
+        showErr("Failed to set password. " + error.message);
         submitBtn.disabled = false;
         submitBtn.textContent = "Set Password";
       }
