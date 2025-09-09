@@ -7,7 +7,7 @@ import {
   updateDoc,
   collection,
   serverTimestamp,
-  increment
+  runTransaction
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 export async function openOrderModal({ buyerId, sellerId, productId, productName, price }) {
@@ -42,9 +42,8 @@ export async function openOrderModal({ buyerId, sellerId, productId, productName
   modal.style.alignItems = "center";
   modal.style.justifyContent = "center";
   modal.style.zIndex = "9999";
-  modal.style.padding = "10px"; // prevent edge collision
+  modal.style.padding = "10px";
 
-  // Step 1
   modal.innerHTML = `
     <div style="
       background:#fff;
@@ -158,37 +157,45 @@ export async function openOrderModal({ buyerId, sellerId, productId, productName
   };
 }
 
+// 🔒 Transaction-based order creation
 async function createOrder({ buyerId, sellerId, productId, qty, address, notes }) {
   const productRef = doc(db, `sellers/${sellerId}/products/${productId}`);
-  const productSnap = await getDoc(productRef);
-  if (!productSnap.exists()) throw new Error("Product not found.");
-  const product = productSnap.data();
+  const buyerRef = doc(db, "buyers", buyerId);
+  const ordersCol = collection(db, `sellers/${sellerId}/orders`);
 
-  if (product.quantity < qty) throw new Error("Not enough stock available.");
+  await runTransaction(db, async (transaction) => {
+    const productSnap = await transaction.get(productRef);
+    if (!productSnap.exists()) throw new Error("Product not found.");
+    const product = productSnap.data();
 
-  const buyerSnap = await getDoc(doc(db, "buyers", buyerId));
-  if (!buyerSnap.exists()) throw new Error("Buyer not found.");
-  const buyer = buyerSnap.data();
+    if (product.quantity < qty) throw new Error("Not enough stock available.");
 
-  await updateDoc(productRef, { quantity: increment(-qty) });
+    const buyerSnap = await transaction.get(buyerRef);
+    if (!buyerSnap.exists()) throw new Error("Buyer not found.");
+    const buyer = buyerSnap.data();
 
-  await addDoc(collection(db, `sellers/${sellerId}/orders`), {
-    buyerId,
-    buyerFirstName: buyer.firstName || "",
-    buyerLastName: buyer.lastName || "",
-    buyerEmail: buyer.email || "",
-    buyerPhone: buyer.phone || "",
-    buyerAddress: address,
-    buyerPhotoURL: buyer.photoURL || "",
-    productId,
-    productName: product.name,
-    productImage: product.imageUrl || "",
-    price: product.price,
-    quantity: qty,
-    totalAmount: product.price * qty,
-    notes,
-    status: "pending",
-    timestamp: serverTimestamp(),
-    lastUpdated: serverTimestamp()
+    // Deduct stock
+    transaction.update(productRef, { quantity: product.quantity - qty });
+
+    // Create order
+    transaction.set(doc(ordersCol), {
+      buyerId,
+      buyerFirstName: buyer.firstName || "",
+      buyerLastName: buyer.lastName || "",
+      buyerEmail: buyer.email || "",
+      buyerPhone: buyer.phone || "",
+      buyerAddress: address,
+      buyerPhotoURL: buyer.photoURL || "",
+      productId,
+      productName: product.name,
+      productImage: product.imageUrl || "",
+      price: product.price,
+      quantity: qty,
+      totalAmount: product.price * qty,
+      notes,
+      status: "pending",
+      timestamp: serverTimestamp(),
+      lastUpdated: serverTimestamp()
+    });
   });
 }

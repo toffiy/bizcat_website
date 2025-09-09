@@ -48,19 +48,14 @@
     .login-btn:hover {
       background: #0b5ed7;
     }
-    .register-btn {
-      background: #6c757d;
-      color: #fff;
-    }
-    .register-btn:hover {
-      background: #5a6268;
-    }
+   
     #errorMsg {
       color: #e53935;
       margin-top: 10px;
       font-size: 0.9rem;
       font-weight: 500;
     }
+    
     .google-btn {
       background: #fff;
       color: #212529;
