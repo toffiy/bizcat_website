@@ -1,19 +1,48 @@
 import { auth } from './firebaseConfig.js';
-import { sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import { RecaptchaVerifier, signInWithPhoneNumber } 
+  from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
-document.getElementById('resetBtn').addEventListener('click', () => {
-  const email = document.getElementById('email').value;
+let confirmationResult;
 
-  if (!email) {
-    document.getElementById('message').innerText = "Please enter your email.";
-    return;
+// Show messages
+function showMessage(msg) {
+  document.getElementById('message').innerText = msg;
+}
+
+// Step 1: Setup reCAPTCHA
+window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+  size: 'normal',
+  callback: (response) => {
+    // reCAPTCHA solved
   }
+});
 
-  sendPasswordResetEmail(auth, email)
-    .then(() => {
-      document.getElementById('message').innerText = "Password reset link sent to your email.";
-    })
-    .catch((error) => {
-      document.getElementById('message').innerText = error.message;
-    });
+// Step 2: Send OTP
+document.getElementById('sendOtpBtn').addEventListener('click', async () => {
+  const phoneNumber = document.getElementById('phoneNumber').value.trim();
+  if (!phoneNumber) return showMessage("Enter your phone number.");
+
+  try {
+    confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, window.recaptchaVerifier);
+    showMessage("OTP sent to your phone.");
+    document.getElementById('step1').style.display = 'none';
+    document.getElementById('step2').style.display = 'block';
+  } catch (error) {
+    showMessage("Error sending OTP: " + error.message);
+  }
+});
+
+// Step 3: Verify OTP
+document.getElementById('verifyOtpBtn').addEventListener('click', async () => {
+  const code = document.getElementById('otpCode').value.trim();
+  if (!code) return showMessage("Enter the OTP.");
+
+  try {
+    const result = await confirmationResult.confirm(code);
+    const user = result.user;
+    showMessage("Phone verified. User ID: " + user.uid);
+    // Here you can redirect to reset password page or dashboard
+  } catch (error) {
+    showMessage("Invalid OTP: " + error.message);
+  }
 });

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify Phone | BizCat</title>
+</head>
+<body>
+  <h2>Verify Your Phone Number</h2>
+
+  <input type="text" id="phoneNumber" placeholder="+63 912 345 6789" required>
+  <div id="recaptcha-container"></div>
+  <button id="sendOtpBtn">Send OTP</button>
+
+  <input type="text" id="otpCode" placeholder="Enter OTP" required>
+  <button id="verifyOtpBtn">Verify OTP</button>
+
+  <p id="message"></p>
+
+  <script type="module">
+    import { auth } from './firebase_config.js';
+    import { RecaptchaVerifier, signInWithPhoneNumber } 
+      from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+
+    let confirmationResult;
+
+    function showMessage(msg) {
+      document.getElementById('message').innerText = msg;
+    }
+
+    // Setup reCAPTCHA
+    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { size: 'normal' });
+
+    // Send OTP
+    document.getElementById('sendOtpBtn').addEventListener('click', async () => {
+      const phoneNumber = document.getElementById('phoneNumber').value.trim();
+      if (!phoneNumber) return showMessage("Enter your phone number.");
+
+      try {
+        confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, window.recaptchaVerifier);
+        showMessage("OTP sent to your phone.");
+      } catch (error) {
+        showMessage("Error sending OTP: " + error.message);
+      }
+    });
+
+    // Verify OTP
+    document.getElementById('verifyOtpBtn').addEventListener('click', async () => {
+      const code = document.getElementById('otpCode').value.trim();
+      if (!code) return showMessage("Enter the OTP.");
+
+      try {
+        const result = await confirmationResult.confirm(code);
+        const user = result.user;
+
+        // Store UID in sessionStorage so next page knows who to update
+        sessionStorage.setItem("verifiedUID", user.uid);
+
+        // Redirect to password page
+        window.location.href = "set_password.html";
+      } catch (error) {
+        showMessage("Invalid OTP: " + error.message);
+      }
+    });
+  </script>
+</body>
+</html>
