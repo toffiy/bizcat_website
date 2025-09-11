@@ -7,20 +7,18 @@ import {
   collection,
   onSnapshot
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-import { openOrderModal } from './order_modal.js'; // ✅ Import modal
+import { openOrderModal } from './order_modal.js';
 
 const productList = document.getElementById("product-list");
 const urlParams = new URLSearchParams(window.location.search);
 const sellerId = urlParams.get("seller");
 
 onAuthStateChanged(auth, async (user) => {
-  // ✅ If not logged in → redirect to login with redirect param
   if (!user) {
-  const currentUrl = window.location.href; // full URL
-  window.location.href = `login.html?redirect=${encodeURIComponent(currentUrl)}`;
-  return;
+    const currentUrl = window.location.href;
+    window.location.href = `login.html?redirect=${encodeURIComponent(currentUrl)}`;
+    return;
   }
-
 
   if (!sellerId) {
     productList.innerHTML = "<p>No seller selected.</p>";
@@ -28,6 +26,7 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   try {
+    // Get seller info from sellers collection
     const sellerRef = doc(db, "sellers", sellerId);
     const sellerSnap = await getDoc(sellerRef);
 
@@ -38,15 +37,40 @@ onAuthStateChanged(auth, async (user) => {
 
     const sellerData = sellerSnap.data();
 
+    // Seller header with live container placeholder
     productList.innerHTML = `
-      <h2>${sellerData.firstName || ''} ${sellerData.lastName || ''}</h2>
-      <p><strong>Email:</strong> ${sellerData.email || 'N/A'}</p>
-      <h3>Products:</h3>
-      <div id="seller-products"><em>Loading products...</em></div>
+      <div class="seller-header">
+        <div class="seller-info">
+          <h2 class="seller-name">${sellerData.firstName || ''} ${sellerData.lastName || ''}</h2>
+          <p class="seller-email"><strong>Email:</strong> ${sellerData.email || 'N/A'}</p>
+        </div>
+        <div id="live-container"></div>
+      </div>
+      <h3 class="products-title">Products</h3>
+      <div id="seller-products" class="products-grid"><em>Loading products...</em></div>
     `;
+
+    const liveContainer = document.getElementById("live-container");
+
+    // Listen to live status from users/{sellerId}
+    onSnapshot(doc(db, "sellers", sellerId), (userDoc) => {
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        if (userData.isLive && userData.fbLiveLink) {
+          liveContainer.innerHTML = `
+            <a href="${userData.fbLiveLink}" target="_blank" class="watch-live-btn">
+              Watch Live
+            </a>
+          `;
+        } else {
+          liveContainer.innerHTML = "";
+        }
+      }
+    });
 
     const productsDiv = document.getElementById("seller-products");
 
+    // Listen to products in real time
     onSnapshot(collection(db, `sellers/${sellerId}/products`), (productsSnap) => {
       if (productsSnap.empty) {
         productsDiv.innerHTML = "<p>No products found.</p>";
@@ -60,39 +84,33 @@ onAuthStateChanged(auth, async (user) => {
         sortedProducts.push({ id: docSnap.id, ...docSnap.data() });
       });
 
-      // Sort: visible first
+      // Sort visible products first
       sortedProducts.sort((a, b) => (b.isVisible === true ? 1 : -1) - (a.isVisible === true ? 1 : -1));
 
       sortedProducts.forEach(p => {
-        const card = document.createElement("div");
-        card.className = "product-card";
-        card.style.marginBottom = "15px";
-        card.style.border = "1px solid #ccc";
-        card.style.padding = "10px";
-        card.style.borderRadius = "8px";
-        card.style.opacity = p.isVisible && p.quantity > 0 ? "1" : "0.5";
-
-        const imageUrl = p.imageUrl || "https://via.placeholder.com/250x150";
-
-        // ✅ Button condition: must be visible AND have stock
         const isOrderable = p.isVisible && p.quantity > 0;
-        const buttonLabel = isOrderable ? "Order Now" : (p.quantity === 0 ? "Out of Stock" : "Not Available");
-        const buttonStyle = isOrderable
-          ? 'background-color:#2563eb; cursor:pointer;'
-          : 'background-color:#ccc; cursor:not-allowed;';
+        const buttonLabel = isOrderable
+          ? "Order Now"
+          : (p.quantity === 0 ? "Out of Stock" : "Not Available");
+
+        const card = document.createElement("div");
+        card.className = `product-card ${isOrderable ? '' : 'disabled'}`;
 
         card.innerHTML = `
-          <img src="${imageUrl}" alt="${p.name}" style="width:100%; height:180px; object-fit:cover; border-radius:8px; margin-bottom:10px; background-color:#eee;">
-          <strong>${p.name || "Unnamed Product"}</strong><br>
-          Price: ₱${p.price || 'N/A'}<br>
-          Stock: ${p.quantity || 0}<br>
-          <button style="margin-top:10px; padding:8px 12px; border:none; border-radius:5px; font-weight:bold; ${buttonStyle}" ${isOrderable ? "" : "disabled"}>${buttonLabel}</button>
+          <img src="${p.imageUrl || "https://via.placeholder.com/250x150"}" 
+               alt="${p.name}" class="product-image">
+          <div class="product-details">
+            <h4 class="product-name">${p.name || "Unnamed Product"}</h4>
+            <p class="product-price">₱${p.price || 'N/A'}</p>
+            <p class="product-stock">${p.quantity || 0} in stock</p>
+            <button class="order-btn" ${isOrderable ? "" : "disabled"}>${buttonLabel}</button>
+          </div>
         `;
 
         productsDiv.appendChild(card);
 
-        // ✅ Attach order modal trigger only if orderable
-        const orderBtn = card.querySelector("button");
+        // Attach order modal trigger
+        const orderBtn = card.querySelector(".order-btn");
         if (isOrderable && orderBtn) {
           orderBtn.addEventListener("click", () => {
             openOrderModal({

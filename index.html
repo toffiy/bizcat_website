@@ -3,25 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BizCat Sellers</title>
-
+  <title>MarketPlace - Sellers</title>
   <link rel="stylesheet" href="css/homepage.css">
-
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-
 <body>
+  <!-- Header -->
   <header class="marketplace-header">
     <div class="header-left">
       <h1 class="marketplace-title">MarketPlace</h1>
     </div>
-
     <div class="header-right">
-    <div id="welcomeText">
-      <span class="welcome-label">Welcome</span>
-      <span id ="welcome-name">name</span>
-    </div>
-
+      <div id="welcomeText">
+        <span class="welcome-label">Welcome</span>
+        <span id="welcome-name">name</span>
+      </div>
       <div class="menu-container">
         <button id="menuBtn" class="menu-btn" aria-label="Menu">
           <span></span>
@@ -29,27 +25,37 @@
           <span></span>
         </button>
         <ul class="menu-dropdown">
-          <li><a href="/profile">Profile</a></li>
-          <li><a href="/order">My Orders</a></li>
+          <li><a href="profile.html">Profile</a></li>
+          <li><a href="order.html">My Orders</a></li>
+          <li><a href="#" id="logoutLink">Logout</a></li>
         </ul>
       </div>
     </div>
   </header>
 
-  <h3 id="avail" class="available-seller">Available Sellers:</h3>
-  <div id="sellerContainer" class="seller-grid"></div>
+  <div class="page-container">
+  <!-- Leaderboard -->
+  <section class="leaderboard-section">
+    <h2 id="leadearboard_title" h2 class="section-title">Top Sellers Leaderboard</h2>
+    <div id="leaderboardContainer" class="leaderboard-grid"></div>
+      
+  </section>
+
+  <!-- Sellers List -->
+  <section class="sellers-section">
+    <h2 id="sellersCount" class="section-title">Sellers (0)</h2>
+    <div id="sellerListContainer" class="seller-list-grid"></div>
+  </section>
+</div>
+
 
   <script type="module" src="./firebase/seller_catalog.js"></script>
-
   <script>
     const menuContainer = document.querySelector('.menu-container');
     const menuBtn = document.getElementById('menuBtn');
-
     menuBtn.addEventListener('click', () => {
       menuContainer.classList.toggle('active');
     });
-
-    // Close menu when clicking outside
     document.addEventListener('click', (e) => {
       if (!menuContainer.contains(e.target)) {
         menuContainer.classList.remove('active');
