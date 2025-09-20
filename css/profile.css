@@ -86,14 +86,6 @@ body {
   background: #0b5ed7;
 }
 
-.logout-btn {
-  background: #dc3545;
-  color: #fff;
-}
-
-.logout-btn:hover {
-  background: #b02a37;
-}
 
 /* Modal Styles */
 .modal-overlay {

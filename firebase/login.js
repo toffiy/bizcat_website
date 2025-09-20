@@ -72,7 +72,6 @@ googleLoginBtn.addEventListener("click", async () => {
     const snapshot = await getDoc(userRef);
 
     if (!snapshot.exists()) {
-      // First-time Google login — create buyer record
       await setDoc(userRef, {
         uid: user.uid,
         firstName,
@@ -85,15 +84,14 @@ googleLoginBtn.addEventListener("click", async () => {
         passwordSet: false,
         createdAt: serverTimestamp()
       });
-      redirectAfterLogin("set_password.html");
-    } else {
-      const buyerData = snapshot.data();
-      if (buyerData.passwordSet) {
-        redirectAfterLogin("index.html");
-      } else {
-        redirectAfterLogin("set_password.html");
-      }
     }
+
+    // ✅ Store the Gmail they picked
+    sessionStorage.setItem("pendingEmail", user.email);
+
+    // Redirect to verify_email.html
+    window.location.href = "verify_email.html";
+
   } catch (error) {
     errorMsg.textContent = "Google login failed. Please try again.";
   }

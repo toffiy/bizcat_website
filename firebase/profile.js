@@ -9,7 +9,6 @@ const emailView = document.getElementById('emailView');
 const phoneView = document.getElementById('phoneView');
 const addressView = document.getElementById('addressView');
 const profileImg = document.getElementById('profileImg');
-const logoutBtn = document.getElementById('logoutBtn');
 const editBtn = document.getElementById('editBtn');
 const photoInput = document.getElementById('photoInput');
 const photoUploadSection = document.getElementById('photoUploadSection');
@@ -161,12 +160,6 @@ successOk.addEventListener('click', () => {
   successModal.style.display = 'none';
 });
 
-// Logout
-logoutBtn.addEventListener('click', async () => {
-  await signOut(auth);
-  window.location.href = "login.html";
-});
-const backBtn = document.getElementById('backBtn');
 
 backBtn.addEventListener('click', () => {
   window.location.href = "index.html";

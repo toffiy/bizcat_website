@@ -38,10 +38,15 @@ onAuthStateChanged(auth, async (user) => {
     if (logoutLink) {
       logoutLink.addEventListener("click", async (e) => {
         e.preventDefault();
+
+        const confirmLogout = confirm("Are you sure you want to log out?");
+        if (!confirmLogout) return; // stop if user cancels
+
         await signOut(auth);
         window.location.href = "login.html";
       });
     }
+
 
     // Listen to sellers collection
     onSnapshot(collection(db, "sellers"), async (sellersSnapshot) => {
@@ -144,10 +149,14 @@ function renderLeaderboard(topSellers) {
 
       <p class="products-count">${seller.totalProducts} Products Available</p>
 
-      <button class="visit-btn" ${seller.isLive ? "" : "disabled"}>
-        ${seller.isLive ? "Visit Store" : "Store Offline"}
-      </button>
+      <button class="visit-btn">View Catalog</button>
     `;
+
+    // Make button clickable regardless of live status
+    card.querySelector(".visit-btn").addEventListener("click", () => {
+      window.location.href = `catalog.html?seller=${seller.id}`;
+    });
+
     leaderboardContainer.appendChild(card);
   });
 }
