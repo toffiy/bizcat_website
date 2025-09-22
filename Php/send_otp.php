@@ -1,52 +1,62 @@
 <?php
-header("Access-Control-Allow-Origin: *");
+// --- CORS HEADERS ---
+header("Access-Control-Allow-Origin: https://toffiy.github.io"); // whitelist your GitHub Pages domain
+header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
-header("Content-Type: application/json");
 
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
+// Handle preflight OPTIONS request
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
 
-session_start();
-require 'config.php';
-require '../vendor/autoload.php';
+// --- LOAD COMPOSER AUTOLOADER ---
+require __DIR__ . '/../vendor/autoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-// Get email from POST
-$email = $_POST['email'] ?? null;
-$email = filter_var($email, FILTER_SANITIZE_EMAIL);
+// --- READ INPUT ---
+$data = json_decode(file_get_contents("php://input"), true);
+$email = $data['email'] ?? null;
 
-if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    echo json_encode(["success" => false, "message" => "Invalid email format"]);
-    exit;
+if (!$email) {
+    echo json_encode(["success" => false, "message" => "No email provided"]);
+    exit();
 }
 
-// Generate OTP
-$otp = random_int(100000, 999999);
-$_SESSION['otp'] = $otp;
-$_SESSION['otp_email'] = $email;
-$_SESSION['otp_expiry'] = time() + 300; // 5 minutes
+// --- GENERATE OTP ---
+$otp = rand(100000, 999999);
 
-// Send email
+// TODO: Store OTP in your DB or Firebase for later verification
+// For now, just log it (InfinityFree has no DB by default)
+file_put_contents(__DIR__ . "/otp_log.txt", "$email : $otp\n", FILE_APPEND);
+
+// --- SEND EMAIL ---
 $mail = new PHPMailer(true);
-try {
-    $mail->isSMTP();
-    $mail->Host = 'smtp.gmail.com';
-    $mail->SMTPAuth = true;
-    $mail->Username = SMTP_USER;
-    $mail->Password = SMTP_PASS;
-    $mail->SMTPSecure = 'tls';
-    $mail->Port = 587;
 
-    $mail->setFrom(SMTP_FROM, SMTP_NAME);
+try {
+    // Server settings
+    $mail->isSMTP();
+    $mail->Host       = 'smtp.gmail.com';   // or your SMTP provider
+    $mail->SMTPAuth   = true;
+    $mail->Username   = 'yourgmail@gmail.com';   // replace with your email
+    $mail->Password   = 'your-app-password';     // use App Password, not your real Gmail password
+    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+    $mail->Port       = 587;
+
+    // Recipients
+    $mail->setFrom('yourgmail@gmail.com', 'BizCat OTP');
     $mail->addAddress($email);
+
+    // Content
     $mail->isHTML(true);
     $mail->Subject = 'Your BizCat OTP Code';
-    $mail->Body = "<p>Your OTP code is: <strong>$otp</strong></p><p>This code will expire in 5 minutes.</p>";
+    $mail->Body    = "<p>Your OTP code is: <b>$otp</b></p>";
 
     $mail->send();
-    echo json_encode(["success" => true, "message" => "OTP sent to $email"]);
+
+    echo json_encode(["success" => true, "message" => "OTP sent"]);
 } catch (Exception $e) {
     echo json_encode(["success" => false, "message" => "Mailer Error: {$mail->ErrorInfo}"]);
 }
