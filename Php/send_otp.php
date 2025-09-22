@@ -1,51 +1,52 @@
 <?php
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Headers: Content-Type");
+header("Content-Type: application/json");
+
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
+session_start();
+require 'config.php';
+require '../vendor/autoload.php';
+
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-require 'vendor/autoload.php'; // PHPMailer
-require 'config.php';          // your private credentials
-
-session_start();
-header('Content-Type: application/json');
-
-// Get email from request
+// Get email from POST
 $email = $_POST['email'] ?? null;
 $email = filter_var($email, FILTER_SANITIZE_EMAIL);
 
-if (!$email) {
-    echo json_encode(["success" => false, "message" => "Invalid email"]);
+if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    echo json_encode(["success" => false, "message" => "Invalid email format"]);
     exit;
 }
 
 // Generate OTP
-$otp = rand(100000, 999999);
+$otp = random_int(100000, 999999);
 $_SESSION['otp'] = $otp;
 $_SESSION['otp_email'] = $email;
 $_SESSION['otp_expiry'] = time() + 300; // 5 minutes
 
+// Send email
 $mail = new PHPMailer(true);
-
 try {
-    // Server settings
     $mail->isSMTP();
-    $mail->Host       = 'smtp.gmail.com';
-    $mail->SMTPAuth   = true;
-    $mail->Username   = SMTP_USER;
-    $mail->Password   = SMTP_PASS;
-    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-    $mail->Port       = 587;
+    $mail->Host = 'smtp.gmail.com';
+    $mail->SMTPAuth = true;
+    $mail->Username = SMTP_USER;
+    $mail->Password = SMTP_PASS;
+    $mail->SMTPSecure = 'tls';
+    $mail->Port = 587;
 
-    // Recipients
     $mail->setFrom(SMTP_FROM, SMTP_NAME);
     $mail->addAddress($email);
-
-    // Content
     $mail->isHTML(true);
-    $mail->Subject = 'Your OTP Code';
-    $mail->Body    = "Your OTP code is <b>$otp</b>. It expires in 5 minutes.";
+    $mail->Subject = 'Your BizCat OTP Code';
+    $mail->Body = "<p>Your OTP code is: <strong>$otp</strong></p><p>This code will expire in 5 minutes.</p>";
 
     $mail->send();
-    echo json_encode(["success" => true, "message" => "OTP sent"]);
+    echo json_encode(["success" => true, "message" => "OTP sent to $email"]);
 } catch (Exception $e) {
     echo json_encode(["success" => false, "message" => "Mailer Error: {$mail->ErrorInfo}"]);
 }

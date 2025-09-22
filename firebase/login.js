@@ -1,4 +1,3 @@
-// login.js
 import { auth } from './firebase_config.js';
 import {
   signInWithEmailAndPassword,
@@ -57,7 +56,7 @@ loginForm.addEventListener("submit", async (e) => {
   }
 });
 
-// Google Sign-In
+// Google Sign-In with OTP check
 googleLoginBtn.addEventListener("click", async () => {
   const provider = new GoogleAuthProvider();
   try {
@@ -72,6 +71,7 @@ googleLoginBtn.addEventListener("click", async () => {
     const snapshot = await getDoc(userRef);
 
     if (!snapshot.exists()) {
+      // New user → create record
       await setDoc(userRef, {
         uid: user.uid,
         firstName,
@@ -84,15 +84,42 @@ googleLoginBtn.addEventListener("click", async () => {
         passwordSet: false,
         createdAt: serverTimestamp()
       });
+
+      // Redirect to set password
+      sessionStorage.setItem("pendingEmail", user.email);
+      window.location.href = "set_password.html";
+      return;
     }
 
-    // ✅ Store the Gmail they picked
+    const userData = snapshot.data();
     sessionStorage.setItem("pendingEmail", user.email);
 
-    // Redirect to verify_email.html
-    window.location.href = "verify_email.html";
+    if (userData.passwordSet === true) {
+      // ✅ Send OTP and redirect to verify
+      try {
+        const response = await fetch("https://bizcat.wuaze.com/Php/send_otp.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ email: user.email })
+      });
+
+
+        const result = await response.json();
+        if (!result.success) throw new Error(result.message);
+
+        window.location.href = "verify_email.html";
+      } catch (err) {
+        errorMsg.textContent = "Failed to send OTP. Please try again.";
+        console.error("OTP error:", err);
+      }
+
+    } else {
+      // No password yet → go to set password
+      window.location.href = "set_password.html";
+    }
 
   } catch (error) {
+    console.error(error);
     errorMsg.textContent = "Google login failed. Please try again.";
   }
 });

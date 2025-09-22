@@ -2,117 +2,199 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Verify Email | BizCat</title>
-  <link rel="stylesheet" href="css/login.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verify Your Email | BizCat</title>
   <style>
-    #errorMsg { margin-top: 10px; font-size: 14px; }
-    .success { color: green; }
-    .error { color: red; }
+    :root {
+      --primary-color: #007bff;
+      --input-bg: #f9f9f9;
+      --border-color: #ddd;
+      --text-color: #333;
+      --error-color: #d9534f;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #fff;
+      color: var(--text-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 400px;
+      padding: 2rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: var(--primary-color);
+    }
+
+    label {
+      font-size: 0.9rem;
+      margin-bottom: 0.25rem;
+      display: block;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background-color: var(--input-bg);
+      margin-bottom: 1rem;
+      font-size: 1rem;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      background-color: var(--primary-color);
+      color: #fff;
+      cursor: pointer;
+      margin-bottom: 1rem;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #resendOtpBtn {
+      background-color: #f0f0f0;
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+      display: none;
+    }
+
+    #countdown {
+      font-size: 0.85rem;
+      color: #666;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    #errorMsg {
+      color: var(--error-color);
+      font-size: 0.85rem;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
   </style>
 </head>
 <body>
-  <div class="login-container">
+  <div class="container">
     <h2>Verify Your Email</h2>
 
-    <input type="text" id="userEmail" placeholder="Your email" readonly />
-    <button id="sendOtpBtn" class="login-btn">Send OTP</button>
+    <label>Email</label>
+    <input type="email" id="email" readonly />
 
-    <input type="text" id="otpCode" placeholder="Enter OTP" required />
-    <button id="verifyOtpBtn" class="login-btn">Verify OTP</button>
+    <div id="countdown">Sending OTP...</div>
+    <button id="resendOtpBtn">Resend OTP</button>
 
-    <p id="errorMsg"></p>
+    <label>Enter OTP</label>
+    <input type="text" id="otp" placeholder="6-digit code" />
+
+    <button id="verifyOtpBtn">Verify OTP</button>
+
+    <div id="errorMsg"></div>
   </div>
 
-  <script type="module">
-    const emailInput = document.getElementById("userEmail");
-    const sendOtpBtn = document.getElementById("sendOtpBtn");
-    const otpInput = document.getElementById("otpCode");
-    const verifyOtpBtn = document.getElementById("verifyOtpBtn");
+  <script>
+    const emailInput = document.getElementById("email");
+    const otpInput = document.getElementById("otp");
     const errorMsg = document.getElementById("errorMsg");
+    const countdownDisplay = document.getElementById("countdown");
+    const resendOtpBtn = document.getElementById("resendOtpBtn");
 
-    const showMsg = (msg, type = "error") => {
-      errorMsg.textContent = msg;
-      errorMsg.className = type;
-    };
+    const storedEmail = sessionStorage.getItem("pendingEmail");
+    emailInput.value = storedEmail || "";
 
-    // ✅ Get email from sessionStorage
-    const currentEmail = sessionStorage.getItem("pendingEmail");
-    if (!currentEmail) {
-      showMsg("No email found. Please log in again.");
-      sendOtpBtn.disabled = true;
-      verifyOtpBtn.disabled = true;
-    } else {
-      emailInput.value = currentEmail;
+    let countdown = 60;
+    let countdownInterval;
+
+    async function sendOtp() {
+      errorMsg.textContent = "";
+      countdownDisplay.textContent = "Sending OTP...";
+      resendOtpBtn.style.display = "none";
+
+      try {
+        const response = await fetch("http://localhost:8000/Php/send_otp.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({ email: emailInput.value.trim() })
+        });
+
+        const result = await response.json();
+        if (!result.success) throw new Error(result.message);
+
+        startCountdown();
+      } catch (err) {
+        errorMsg.textContent = "Error sending OTP: " + err.message;
+        countdownDisplay.textContent = "Failed to send OTP.";
+      }
     }
 
-    // Send OTP
-    sendOtpBtn.addEventListener("click", async () => {
-      if (!currentEmail) return;
+    function startCountdown() {
+      countdown = 60;
+      countdownDisplay.textContent = `Waiting for OTP... (${countdown}s)`;
 
-      sendOtpBtn.disabled = true;
-      showMsg("Sending OTP...", "success");
+      clearInterval(countdownInterval);
+      countdownInterval = setInterval(() => {
+        countdown--;
+        countdownDisplay.textContent = `Waiting for OTP... (${countdown}s)`;
+
+        if (countdown <= 0) {
+          clearInterval(countdownInterval);
+          countdownDisplay.textContent = "Didn't receive the code?";
+          resendOtpBtn.style.display = "block";
+        }
+      }, 1000);
+    }
+
+    resendOtpBtn.addEventListener("click", () => {
+      sendOtp();
+    });
+
+    document.getElementById("verifyOtpBtn").addEventListener("click", async () => {
+      errorMsg.textContent = "";
+      const email = emailInput.value.trim();
+      const otp = otpInput.value.trim();
+
+      if (!otp || otp.length !== 6) {
+        errorMsg.textContent = "Please enter a valid 6-digit OTP.";
+        return;
+      }
 
       try {
-        const res = await fetch("send_otp.php", {
+        const response = await fetch("http://localhost:8000/Php/verify_otp.php", {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: new URLSearchParams({ email: currentEmail })
+          body: new URLSearchParams({ email, otp })
         });
 
-        const data = await res.json();
+        const result = await response.json();
+        if (!result.success) throw new Error(result.message);
 
-        if (data.success) {
-          showMsg("OTP sent to " + currentEmail, "success");
-          otpInput.focus();
-        } else {
-          showMsg(data.message || "Failed to send OTP");
-        }
-      } catch (error) {
-        showMsg("Error sending OTP: " + error.message);
-      } finally {
-        sendOtpBtn.disabled = false;
+        window.location.href = "index.html"; // ✅ Redirect to dashboard
+      } catch (err) {
+        errorMsg.textContent = "OTP verification failed: " + err.message;
       }
     });
 
-    // Verify OTP
-    verifyOtpBtn.addEventListener("click", async () => {
-      const code = otpInput.value.trim();
-      if (!code) return showMsg("Enter the OTP.");
-
-      verifyOtpBtn.disabled = true;
-      showMsg("Verifying OTP...", "success");
-
-      try {
-        const res = await fetch("verify_otp.php", {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: new URLSearchParams({ otp: code, email: currentEmail })
-        });
-
-        const data = await res.json();
-
-        if (data.success) {
-          sessionStorage.setItem("emailVerified", "true");
-          sessionStorage.setItem("verifiedEmail", currentEmail);
-          showMsg("OTP verified! Redirecting...", "success");
-          setTimeout(() => {
-            window.location.href = "set_password.html";
-          }, 1000);
-        } else {
-          showMsg(data.message || "Invalid or expired OTP");
-        }
-      } catch (error) {
-        showMsg("Error verifying OTP: " + error.message);
-      } finally {
-        verifyOtpBtn.disabled = false;
-      }
-    });
-
-    // Auto-send OTP on page load
-    window.addEventListener("DOMContentLoaded", () => {
-      if (currentEmail) sendOtpBtn.click();
-    });
+    window.addEventListener("DOMContentLoaded", sendOtp);
   </script>
 </body>
 </html>
