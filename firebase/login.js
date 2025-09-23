@@ -98,10 +98,14 @@ googleLoginBtn.addEventListener("click", async () => {
       // ✅ Send OTP and redirect to verify
       try {
         const response = await fetch("https://bizcat-shop.42web.io/send_otp.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({ email: user.email })
-      });
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ test: true })
+        })
+        .then(r => r.json())
+        .then(console.log)
+        .catch(console.error);
+
 
 
         const result = await response.json();
