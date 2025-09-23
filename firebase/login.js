@@ -97,7 +97,7 @@ googleLoginBtn.addEventListener("click", async () => {
     if (userData.passwordSet === true) {
       // ✅ Send OTP and redirect to verify
       try {
-        const response = await fetch("https://bizcat.wuaze.com/Php/send_otp.php", {
+        const response = await fetch("https://bizcat-shop.42web.io/send_otp.php", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({ email: user.email })

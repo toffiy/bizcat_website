@@ -131,7 +131,7 @@
       resendOtpBtn.style.display = "none";
 
       try {
-        const response = await fetch("https://biz-cat.42web.io/send_otp.php", {
+        const response = await fetch("https://bizcat-shop.42web.io/send_otp.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: emailInput.value.trim() })
@@ -179,7 +179,7 @@
       }
 
       try {
-      const response = await fetch("https://biz-cat.42web.io/verify_otp.php", {
+      const response = await fetch("https://bizcat-shop.42web.io/verify_otp.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, otp })
