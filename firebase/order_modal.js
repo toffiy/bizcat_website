@@ -174,6 +174,11 @@ async function createOrder({ buyerId, sellerId, productId, qty, address, notes }
     if (!buyerSnap.exists()) throw new Error("Buyer not found.");
     const buyer = buyerSnap.data();
 
+    // ✅ Save address if buyer has none
+    if (!buyer.address || buyer.address.trim() === "") {
+      transaction.update(buyerRef, { address });
+    }
+
     // Deduct stock
     transaction.update(productRef, { quantity: product.quantity - qty });
 

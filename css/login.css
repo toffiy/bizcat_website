@@ -1,13 +1,30 @@
-  body {
+ body {
       font-family: 'Poppins', sans-serif;
-      background: #f8f9fa;
+      background: #1800ad;
       margin: 0;
       padding: 0;
+      height: 100vh;
+
+      /* ✅ Center everything */
       display: flex;
       align-items: center;
       justify-content: center;
-      height: 100vh;
     }
+
+    .login-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px; /* space between logo and card */
+    }
+
+    .login-logo {
+      display: block;
+      margin: 0 auto;
+      max-width: 250px;   /* ✅ larger logo */
+      height: auto;
+    }
+
     .login-container {
       background: #fff;
       padding: 30px;
@@ -17,22 +34,26 @@
       width: 100%;
       text-align: center;
     }
+
     .login-container h2 {
       margin-bottom: 20px;
       font-size: 1.5rem;
       color: #333;
     }
+
     .login-container form {
       display: flex;
       flex-direction: column;
       gap: 15px;
     }
+
     .login-container input {
       padding: 10px;
       border: 1px solid #ccc;
       border-radius: 6px;
       font-size: 1rem;
     }
+
     .login-container button {
       padding: 10px;
       border: none;
@@ -41,21 +62,23 @@
       cursor: pointer;
       transition: background 0.2s ease;
     }
+
     .login-btn {
       background: #0d6efd;
       color: #fff;
     }
+
     .login-btn:hover {
       background: #0b5ed7;
     }
-   
+
     #errorMsg {
       color: #e53935;
       margin-top: 10px;
       font-size: 0.9rem;
       font-weight: 500;
     }
-    
+
     .google-btn {
       background: #fff;
       color: #212529;
@@ -68,11 +91,11 @@
       transition: background 0.2s ease, box-shadow 0.2s ease;
       display: inline-flex;
       align-items: center;
-      justify-content: center;   
+      justify-content: center;
       gap: 5px;
     }
 
-        .google-btn:hover {
+    .google-btn:hover {
       background: #f1f1f1;
       box-shadow: 0 2px 6px rgba(0,0,0,0.05);
     }

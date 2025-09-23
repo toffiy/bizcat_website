@@ -1,8 +1,9 @@
-import { auth } from './firebase_config.js';
+import { auth, db } from './firebase_config.js';
 import {
   signInWithEmailAndPassword,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
 import {
@@ -11,8 +12,6 @@ import {
   setDoc,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-
-import { db } from './firebase_config.js';
 
 // DOM Elements
 const loginForm = document.getElementById("loginForm");
@@ -56,74 +55,61 @@ loginForm.addEventListener("submit", async (e) => {
   }
 });
 
-// Google Sign-In with OTP check
+// Google Sign-In (no OTP, no verify_email)
 googleLoginBtn.addEventListener("click", async () => {
   const provider = new GoogleAuthProvider();
   try {
-    const result = await signInWithPopup(auth, provider);
-    const user = result.user;
+    await signInWithPopup(auth, provider);
 
-    const fullName = user.displayName || "";
-    const [firstName, ...rest] = fullName.split(" ");
-    const lastName = rest.join(" ");
-
-    const userRef = doc(db, "buyers", user.uid);
-    const snapshot = await getDoc(userRef);
-
-    if (!snapshot.exists()) {
-      // New user → create record
-      await setDoc(userRef, {
-        uid: user.uid,
-        firstName,
-        lastName,
-        email: user.email,
-        photoURL: user.photoURL,
-        phone: "",
-        address: "",
-        role: "buyer",
-        passwordSet: false,
-        createdAt: serverTimestamp()
-      });
-
-      // Redirect to set password
-      sessionStorage.setItem("pendingEmail", user.email);
-      window.location.href = "set_password.html";
-      return;
-    }
-
-    const userData = snapshot.data();
-    sessionStorage.setItem("pendingEmail", user.email);
-
-    if (userData.passwordSet === true) {
-      // ✅ Send OTP and redirect to verify
-      try {
-        const response = await fetch("https://bizcat-shop.42web.io/send_otp.php", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ test: true })
-        })
-        .then(r => r.json())
-        .then(console.log)
-        .catch(console.error);
-
-
-
-        const result = await response.json();
-        if (!result.success) throw new Error(result.message);
-
-        window.location.href = "verify_email.html";
-      } catch (err) {
-        errorMsg.textContent = "Failed to send OTP. Please try again.";
-        console.error("OTP error:", err);
+    // ✅ Wait for Firebase to confirm the user
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        console.warn("⚠️ No signed-in user after popup");
+        return;
       }
 
-    } else {
-      // No password yet → go to set password
-      window.location.href = "set_password.html";
-    }
+      const fullName = user.displayName || "";
+      const [firstName, ...rest] = fullName.split(" ");
+      const lastName = rest.join(" ");
 
+      const userRef = doc(db, "buyers", user.uid);
+      const snapshot = await getDoc(userRef);
+
+      if (!snapshot.exists()) {
+        console.log("➡️ New user detected, creating Firestore record...");
+        await setDoc(userRef, {
+          uid: user.uid,
+          firstName,
+          lastName,
+          email: user.email,
+          photoURL: user.photoURL,
+          phone: "",
+          address: "",
+          role: "buyer",
+          passwordSet: false,   // ✅ always false for new users
+          createdAt: serverTimestamp()
+        });
+
+        sessionStorage.setItem("pendingEmail", user.email);
+        console.log("➡️ Redirecting new user to set_password.html");
+        window.location.href = "set_password.html";
+        return;
+      }
+
+      const userData = snapshot.data();
+      console.log("➡️ Existing user data:", userData);
+      sessionStorage.setItem("pendingEmail", user.email);
+
+      if (userData?.passwordSet === true) {
+        console.log("➡️ passwordSet is TRUE → go to app");
+        redirectAfterLogin("index.html");
+      } else {
+        console.log("➡️ passwordSet is FALSE or missing → Set Password flow");
+        window.location.href = "set_password.html";
+      }
+    });
   } catch (error) {
-    console.error(error);
+    console.error("Google login error:", error);
     errorMsg.textContent = "Google login failed. Please try again.";
   }
 });

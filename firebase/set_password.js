@@ -18,11 +18,6 @@ const submitBtn = document.getElementById("submitPassword");
 
 const showErr = (m) => { if (errorMsg) errorMsg.textContent = m; };
 
-// ✅ Redirect if email not verified via OTP
-if (sessionStorage.getItem("emailVerified") !== "true") {
-  window.location.href = "verify_email.html";
-}
-
 function validatePassword(pw) {
   const issues = [];
   if (pw.length < 8) issues.push("Min 8 characters.");
@@ -71,11 +66,11 @@ submitBtn.addEventListener("click", async () => {
       // Update Firestore
       await setDoc(buyerRef, {
         passwordSet: true,
-        email: sessionStorage.getItem("verifiedEmail"),
+        email: user.email, // use current user email directly
         updatedAt: serverTimestamp()
       }, { merge: true });
 
-      // Clear session
+      // Clear any session flags if you were using them
       sessionStorage.removeItem("emailVerified");
       sessionStorage.removeItem("verifiedEmail");
 

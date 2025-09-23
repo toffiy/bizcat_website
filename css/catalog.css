@@ -6,7 +6,7 @@
   --border-card: #e5e7eb;
   --shadow-card: 0 4px 16px rgba(0,0,0,0.05);
   --shadow-hover: 0 8px 24px rgba(0,0,0,0.08);
-  --text-primary: #111827;
+  --text-primary: color: #ffffff;
   --text-secondary: #4b5563;
   --accent: #2563eb;
   --accent-hover: #1d4ed8;
@@ -200,14 +200,16 @@ h2, h3 {
 /* ===== Back Button ===== */
 .back-button {
   display: inline-block;
-  margin-bottom: 20px;
-  padding: 8px 14px;
-  background-color: #e5e7eb;
-  color: var(--text-primary);
+  padding: 10px 20px;
+  background: #6c757d;
+  color: #ffffff;
   text-decoration: none;
-  border-radius: var(--radius-btn);
-  font-weight: 600;
-  transition: background-color var(--transition-fast);
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  margin: 20px 0 0 20px;
 }
 
 .back-button:active {
