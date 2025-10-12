@@ -45,7 +45,14 @@ h2, h3 {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 8px 12px;
+  background: #fff;
+  border-bottom: 1px solid var(--border-card);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.04);
   margin-bottom: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 /* ===== Seller Profile ===== */
@@ -265,9 +272,10 @@ h2, h3 {
   box-shadow: 0 4px 10px rgba(230, 57, 70, 0.25);
 }
 
-.report-button:active { transform: scale(0.95); }
+.report-button:active {
+  transform: scale(0.95);
+}
 
-/* ===== Animations ===== */
 /* ===== Animations ===== */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
