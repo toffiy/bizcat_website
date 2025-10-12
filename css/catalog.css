@@ -241,36 +241,33 @@ h2, h3 {
 .back-button:hover { background: #5a6268; }
 .back-button:active { transform: scale(0.97); }
 
-/* Report button (icon only) */
-/* ===== Report button (icon only) ===== */
+/* ===== Report Button (professional icon style) ===== */
 .report-button {
-  width: 42px;
-  height: 42px;
-  padding: 0;
-  margin: 0;
-  border: none;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border-card);
   border-radius: 50%;
-  background: var(--danger);
-  color: #fff;
-  font-size: 1.2rem; /* icon size */
+  background: #fff;
+  color: #6b7280; /* neutral gray icon */
+  font-size: 1.1rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(92, 86, 86, 0.25);
   cursor: pointer;
-  transition: background var(--transition-fast), transform var(--transition-fast);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  transition: background var(--transition-fast), color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .report-button:hover {
-  background: var(--danger-hover);
-  box-shadow: 0 6px 16px rgba(8, 8, 8, 0.35);
+  background: var(--danger);
+  color: #fff; /* icon turns white */
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(230, 57, 70, 0.25);
 }
 
-.report-button:active {
-  transform: scale(0.95);
-  background: var(--danger-active);
-}
+.report-button:active { transform: scale(0.95); }
 
+/* ===== Animations ===== */
 /* ===== Animations ===== */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
@@ -386,11 +383,23 @@ h2, h3 {
   .top-bar {
     flex-direction: row;
     justify-content: space-between;
+    align-items: center;
+    gap: 0;
   }
 
   .back-button {
-    font-size: 0.95rem;
+    flex: 0 0 auto;
+    font-size: 0.9rem;
     padding: 8px 14px;
+    margin: 0;
+  }
+
+  .report-button {
+    flex: 0 0 auto;
+    width: 38px;
+    height: 38px;
+    font-size: 1rem;
+    margin: 0;
   }
 
   .seller-profile {
@@ -404,7 +413,7 @@ h2, h3 {
   }
 
   #seller-products {
-    grid-template-columns: 1fr; /* single column on tablets/phones */
+    grid-template-columns: 1fr;
     gap: 1rem;
   }
 
@@ -412,10 +421,7 @@ h2, h3 {
     padding: 16px;
   }
 
-  .product-card img {
-    max-height: 200px;
-  }
-
+  .product-card img { max-height: 200px; }
   .product-card h4 { font-size: 1rem; }
   .product-card p { font-size: 0.85rem; }
   .product-card button {
@@ -436,19 +442,16 @@ h2, h3 {
   }
 
   .report-button {
-    width: 38px;
-    height: 38px;
-    font-size: 1rem;
+    width: 36px;
+    height: 36px;
+    font-size: 0.95rem;
   }
 
   .product-card {
     padding: 14px;
   }
 
-  .product-card img {
-    max-height: 160px;
-  }
-
+  .product-card img { max-height: 160px; }
   .product-card h4 { font-size: 0.95rem; }
   .product-card p { font-size: 0.8rem; }
   .product-card button {
