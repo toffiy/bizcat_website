@@ -3,8 +3,6 @@ import { db } from './firebase_config.js';
 import {
   doc,
   getDoc,
-  addDoc,
-  updateDoc,
   collection,
   serverTimestamp,
   runTransaction
@@ -13,6 +11,7 @@ import {
 export async function openOrderModal({ buyerId, sellerId, productId, productName, price }) {
   let savedAddress = "";
   let productImage = "";
+  let productStock = 0;
 
   try {
     const buyerSnap = await getDoc(doc(db, "buyers", buyerId));
@@ -26,15 +25,18 @@ export async function openOrderModal({ buyerId, sellerId, productId, productName
     if (productSnap.exists()) {
       const productData = productSnap.data();
       productImage = productData.imageUrl || "https://via.placeholder.com/250x150";
+      productStock = productData.quantity || 0;
+      productName = productData.name || productName; // fallback consistency
     }
   } catch (err) {
     console.warn("Could not fetch product image:", err);
   }
 
   const modal = document.createElement("div");
+  modal.setAttribute("role", "dialog");
+  modal.setAttribute("aria-modal", "true");
   modal.style.position = "fixed";
-  modal.style.top = "0";
-  modal.style.left = "0";
+  modal.style.inset = "0";
   modal.style.width = "100%";
   modal.style.height = "100%";
   modal.style.background = "rgba(0,0,0,0.5)";
@@ -43,6 +45,7 @@ export async function openOrderModal({ buyerId, sellerId, productId, productName
   modal.style.justifyContent = "center";
   modal.style.zIndex = "9999";
   modal.style.padding = "10px";
+  modal.style.overflowY = "auto";
 
   modal.innerHTML = `
     <div style="
@@ -54,27 +57,63 @@ export async function openOrderModal({ buyerId, sellerId, productId, productName
       box-sizing:border-box;
       text-align:center;
       font-size:clamp(14px, 2.5vw, 16px);
+      max-height:90vh;
+      overflow-y:auto;
     ">
       <h3>Order: ${productName}</h3>
       <img src="${productImage}" alt="${productName}" style="width:100%;height:auto;max-height:200px;object-fit:cover;border-radius:8px;margin-bottom:10px;">
       <p>Price: ₱${price}</p>
       <label>Quantity:</label>
-      <input type="number" id="order-qty" min="1" value="1" style="width:100%;margin-bottom:10px;font-size:inherit;padding:8px;box-sizing:border-box;">
+      <input type="number" id="order-qty" min="1" max="${productStock}" value="1" 
+        style="width:100%;margin-bottom:10px;font-size:inherit;padding:12px;box-sizing:border-box;">
+      <p style="font-size:0.9em;color:gray;">Available stock: ${productStock}</p>
       <div style="text-align:right;">
-        <button id="cancel-order" style="margin-right:10px;">Cancel</button>
-        <button id="next-step" style="background:#1d4ed8;color:white;padding:8px 12px;border:none;border-radius:5px;font-weight:bold;">Next</button>
+        <button id="cancel-order" style="margin-right:10px;min-height:44px;">Cancel</button>
+        <button id="next-step" style="background:#1d4ed8;color:white;padding:12px 16px;border:none;border-radius:5px;font-weight:bold;min-height:44px;">Next</button>
       </div>
     </div>
   `;
   document.body.appendChild(modal);
 
+  // Focus trap
+  const focusable = modal.querySelectorAll("button, input, textarea");
+  let firstEl = focusable[0], lastEl = focusable[focusable.length - 1];
+  modal.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") modal.remove();
+    if (e.key === "Tab") {
+      if (e.shiftKey && document.activeElement === firstEl) {
+        e.preventDefault(); lastEl.focus();
+      } else if (!e.shiftKey && document.activeElement === lastEl) {
+        e.preventDefault(); firstEl.focus();
+      }
+    }
+  });
+
+  // ✅ Clamp quantity live
+  const qtyInput = modal.querySelector("#order-qty");
+  qtyInput.addEventListener("input", () => {
+    let val = parseInt(qtyInput.value);
+    if (isNaN(val) || val < 1) {
+      qtyInput.value = 1;
+    } else if (val > productStock) {
+      qtyInput.value = productStock;
+    }
+  });
+
   modal.querySelector("#cancel-order").onclick = () => modal.remove();
 
   modal.querySelector("#next-step").onclick = () => {
-    const qty = parseInt(document.getElementById("order-qty").value);
+    let qty = parseInt(document.getElementById("order-qty").value);
+
     if (!qty || qty < 1) {
       alert("Please enter a valid quantity.");
       return;
+    }
+
+    if (qty > productStock) {
+      qty = productStock;
+      document.getElementById("order-qty").value = productStock;
+      alert(`Maximum available stock is ${productStock}. Quantity adjusted.`);
     }
 
     const safeAddress = (savedAddress || "")
@@ -90,17 +129,19 @@ export async function openOrderModal({ buyerId, sellerId, productId, productName
         max-width:400px;
         box-sizing:border-box;
         font-size:clamp(14px, 2.5vw, 16px);
+        max-height:90vh;
+        overflow-y:auto;
       ">
         <h3>Confirm Order</h3>
         <p><strong>Product:</strong> ${productName}</p>
         <p><strong>Quantity:</strong> ${qty}</p>
         <label>Delivery Address:</label>
-        <textarea id="order-address" style="width:100%;margin-bottom:10px;font-size:inherit;padding:8px;box-sizing:border-box;">${safeAddress}</textarea>
+        <textarea id="order-address" style="width:100%;margin-bottom:10px;font-size:inherit;padding:8px;box-sizing:border-box;min-height:60px;">${safeAddress}</textarea>
         <label>Notes (optional):</label>
-        <textarea id="order-notes" style="width:100%;margin-bottom:10px;font-size:inherit;padding:8px;box-sizing:border-box;"></textarea>
+        <textarea id="order-notes" style="width:100%;margin-bottom:10px;font-size:inherit;padding:8px;box-sizing:border-box;min-height:60px;"></textarea>
         <div style="text-align:right;">
-          <button id="back-step" style="margin-right:10px;">Back</button>
-          <button id="confirm-order" style="background:#1d4ed8;color:white;padding:8px 12px;border:none;border-radius:5px;font-weight:bold;">Place Order</button>
+          <button id="back-step" style="margin-right:10px;min-height:44px;">Back</button>
+          <button id="confirm-order" style="background:#1d4ed8;color:white;padding:12px 16px;border:none;border-radius:5px;font-weight:bold;min-height:44px;">Place Order</button>
         </div>
       </div>
     `;
@@ -142,7 +183,7 @@ export async function openOrderModal({ buyerId, sellerId, productId, productName
             <h3 style="color:green;">✅ Order Placed!</h3>
             <p>Your order for <strong>${productName}</strong> has been placed successfully.</p>
             <p>Quantity: ${qty}</p>
-            <button id="close-success" style="margin-top:10px;background:#1d4ed8;color:white;padding:8px 12px;border:none;border-radius:5px;font-weight:bold;">Close</button>
+            <button id="close-success" style="margin-top:10px;background:#1d4ed8;color:white;padding:12px 16px;border:none;border-radius:5px;font-weight:bold;min-height:44px;">Close</button>
           </div>
         `;
         modal.querySelector("#close-success").onclick = () => modal.remove();
@@ -174,15 +215,15 @@ async function createOrder({ buyerId, sellerId, productId, qty, address, notes }
     if (!buyerSnap.exists()) throw new Error("Buyer not found.");
     const buyer = buyerSnap.data();
 
-    // ✅ Save address if buyer has none
-    if (!buyer.address || buyer.address.trim() === "") {
+    // Always update buyer address if changed
+    if (!buyer.address || buyer.address.trim() !== address.trim()) {
       transaction.update(buyerRef, { address });
     }
 
-    // Deduct stock
+    // Decrement stock
     transaction.update(productRef, { quantity: product.quantity - qty });
 
-    // Create order
+    // Create order document
     transaction.set(doc(ordersCol), {
       buyerId,
       buyerFirstName: buyer.firstName || "",
@@ -192,7 +233,7 @@ async function createOrder({ buyerId, sellerId, productId, qty, address, notes }
       buyerAddress: address,
       buyerPhotoURL: buyer.photoURL || "",
       productId,
-      productName: product.name,
+      productName: product.name || "",
       productImage: product.imageUrl || "",
       price: product.price,
       quantity: qty,

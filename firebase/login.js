@@ -2,8 +2,7 @@ import { auth, db } from './firebase_config.js';
 import {
   signInWithEmailAndPassword,
   GoogleAuthProvider,
-  signInWithPopup,
-  onAuthStateChanged
+  signInWithPopup
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
 import {
@@ -55,59 +54,54 @@ loginForm.addEventListener("submit", async (e) => {
   }
 });
 
-// Google Sign-In (no OTP, no verify_email)
+// Google Sign-In
 googleLoginBtn.addEventListener("click", async () => {
   const provider = new GoogleAuthProvider();
   try {
-    await signInWithPopup(auth, provider);
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
 
-    // ✅ Wait for Firebase to confirm the user
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        console.warn("⚠️ No signed-in user after popup");
-        return;
-      }
+    if (!user) {
+      console.warn("⚠️ No signed-in user after popup");
+      return;
+    }
 
-      const fullName = user.displayName || "";
-      const [firstName, ...rest] = fullName.split(" ");
-      const lastName = rest.join(" ");
+    const fullName = user.displayName || "";
+    const [firstName, ...rest] = fullName.split(" ");
+    const lastName = rest.join(" ");
 
-      const userRef = doc(db, "buyers", user.uid);
-      const snapshot = await getDoc(userRef);
+    const userRef = doc(db, "buyers", user.uid);
+    const snapshot = await getDoc(userRef);
 
-      if (!snapshot.exists()) {
-        console.log("➡️ New user detected, creating Firestore record...");
-        await setDoc(userRef, {
-          uid: user.uid,
-          firstName,
-          lastName,
-          email: user.email,
-          photoURL: user.photoURL,
-          phone: "",
-          address: "",
-          role: "buyer",
-          passwordSet: false,   // ✅ always false for new users
-          createdAt: serverTimestamp()
-        });
+    if (!snapshot.exists()) {
+      // ➡️ New user: create Firestore record
+      await setDoc(userRef, {
+        uid: user.uid,
+        firstName,
+        lastName,
+        email: user.email,
+        photoURL: user.photoURL,
+        phone: "",
+        address: "",
+        role: "buyer",
+        passwordSet: false,
+        createdAt: serverTimestamp()
+      });
 
-        sessionStorage.setItem("pendingEmail", user.email);
-        console.log("➡️ Redirecting new user to set_password.html");
-        window.location.href = "set_password.html";
-        return;
-      }
-
-      const userData = snapshot.data();
-      console.log("➡️ Existing user data:", userData);
       sessionStorage.setItem("pendingEmail", user.email);
+      window.location.href = "set_password.html";
+      return;
+    }
 
-      if (userData?.passwordSet === true) {
-        console.log("➡️ passwordSet is TRUE → go to app");
-        redirectAfterLogin("index.html");
-      } else {
-        console.log("➡️ passwordSet is FALSE or missing → Set Password flow");
-        window.location.href = "set_password.html";
-      }
-    });
+    // ➡️ Existing user
+    const userData = snapshot.data();
+    sessionStorage.setItem("pendingEmail", user.email);
+
+    if (userData.passwordSet === true) {
+      redirectAfterLogin("index.html");
+    } else {
+      window.location.href = "set_password.html";
+    }
   } catch (error) {
     console.error("Google login error:", error);
     errorMsg.textContent = "Google login failed. Please try again.";

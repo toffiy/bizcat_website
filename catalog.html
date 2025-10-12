@@ -5,23 +5,37 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Product Catalog</title>
   <link rel="icon" type="image/png" href="assets/Bizcat_logo.png">
-
-  <!-- Font and Styles -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/catalog.css" />
-  </head>
-  <body>
+</head>
+<body>
 
-  <!-- Back Navigation -->
-  <a href="index.html" button id="backBtn" class="back-button">← Back</a>
-
-  <!-- Catalog Container -->
-  <div id="product-list">
-    <!-- Seller info and product cards will be injected here by JS -->
+  <!-- Top Navigation -->
+  <div class="top-bar">
+    <a href="index.html" id="backBtn" class="back-button">← Back</a>
+    <button id="reportBtn" class="report-button">Report Seller</button>
   </div>
+
+  <!-- Seller Profile Section -->
+  <section class="seller-profile">
+    <h2 id="sellerName">Seller Name</h2>
+    <p id="sellerEmail">Email: example@email.com</p>
+  </section>
+
+  <!-- Search Bar -->
+  <div class="search-bar">
+    <input type="text" id="productSearch" placeholder="🔍 Search products..." />
+  </div>
+
+  <!-- Products Section -->
+  <section class="products-section">
+    <h3 class="products-title">Products</h3>
+    <div id="seller-products" class="products-grid">
+      <em>Loading products...</em>
+    </div>
+  </section>
 
   <!-- Firebase Catalog Script -->
   <script type="module" src="./firebase/product_catalog.js"></script>
-
 </body>
 </html>

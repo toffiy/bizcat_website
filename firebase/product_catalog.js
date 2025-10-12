@@ -1,17 +1,21 @@
-// product_catalog.js
 import { auth, db } from './firebase_config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-import {
-  doc,
-  getDoc,
-  collection,
-  onSnapshot
-} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+import { doc, getDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 import { openOrderModal } from './order_modal.js';
+import { injectReportModal, openReportModal } from './report_modal.js';
 
-const productList = document.getElementById("product-list");
+const sellerNameEl = document.getElementById("sellerName");
+const sellerEmailEl = document.getElementById("sellerEmail");
+const liveContainer = document.getElementById("live-container");
+const productsDiv = document.getElementById("seller-products");
+const reportBtn = document.getElementById("reportBtn");
+const searchInput = document.getElementById("productSearch");
+
 const urlParams = new URLSearchParams(window.location.search);
 const sellerId = urlParams.get("seller");
+
+// Inject modal once
+injectReportModal();
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
@@ -19,86 +23,59 @@ onAuthStateChanged(auth, async (user) => {
     window.location.href = `login.html?redirect=${encodeURIComponent(currentUrl)}`;
     return;
   }
-
   if (!sellerId) {
-    productList.innerHTML = "<p>No seller selected.</p>";
+    productsDiv.innerHTML = "<p>No seller selected.</p>";
     return;
   }
 
   try {
-    // Get seller info from sellers collection
+    // Load seller info
     const sellerRef = doc(db, "sellers", sellerId);
     const sellerSnap = await getDoc(sellerRef);
-
     if (!sellerSnap.exists()) {
-      productList.innerHTML = "<p>Seller not found.</p>";
+      productsDiv.innerHTML = "<p>Seller not found.</p>";
       return;
     }
-
     const sellerData = sellerSnap.data();
+    sellerNameEl.textContent = `${sellerData.firstName || ''} ${sellerData.lastName || ''}`;
+    sellerEmailEl.textContent = `Email: ${sellerData.email || 'N/A'}`;
 
-    // Seller header with live container placeholder
-    productList.innerHTML = `
-      <div class="seller-header">
-        <div class="seller-info">
-          <h2 class="seller-name">${sellerData.firstName || ''} ${sellerData.lastName || ''}</h2>
-          <p class="seller-email"><strong>Email:</strong> ${sellerData.email || 'N/A'}</p>
-        </div>
-        <div id="live-container"></div>
-      </div>
-      <h3 class="products-title">Products</h3>
-      <div id="seller-products" class="products-grid"><em>Loading products...</em></div>
-    `;
+    // Report button
+    if (reportBtn) {
+      reportBtn.addEventListener("click", () => openReportModal(sellerId));
+    }
 
-    const liveContainer = document.getElementById("live-container");
-
-    // Listen to live status from users/{sellerId}
-    onSnapshot(doc(db, "sellers", sellerId), (userDoc) => {
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        if (userData.isLive && userData.fbLiveLink) {
-          liveContainer.innerHTML = `
-            <a href="${userData.fbLiveLink}" target="_blank" class="watch-live-btn">
-              Watch Live
-            </a>
-          `;
-        } else {
-          liveContainer.innerHTML = "";
-        }
+    // Live status
+    onSnapshot(doc(db, "sellers", sellerId), (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        liveContainer.innerHTML = (data.isLive && data.fbLiveLink)
+          ? `<a href="${data.fbLiveLink}" target="_blank" class="watch-live-btn">Watch Live</a>`
+          : "";
       }
     });
 
-    const productsDiv = document.getElementById("seller-products");
-
-    // Listen to products in real time
-    onSnapshot(collection(db, `sellers/${sellerId}/products`), (productsSnap) => {
-      if (productsSnap.empty) {
+    // Products
+    onSnapshot(collection(db, `sellers/${sellerId}/products`), (snap) => {
+      if (snap.empty) {
         productsDiv.innerHTML = "<p>No products found.</p>";
         return;
       }
-
       productsDiv.innerHTML = "";
+      const products = [];
+      snap.forEach(d => products.push({ id: d.id, ...d.data() }));
 
-      const sortedProducts = [];
-      productsSnap.forEach(docSnap => {
-        sortedProducts.push({ id: docSnap.id, ...docSnap.data() });
-      });
+      // Sort visible first
+      products.sort((a, b) => (b.isVisible === true ? 1 : -1) - (a.isVisible === true ? 1 : -1));
 
-      // Sort visible products first
-      sortedProducts.sort((a, b) => (b.isVisible === true ? 1 : -1) - (a.isVisible === true ? 1 : -1));
-
-      sortedProducts.forEach(p => {
+      products.forEach(p => {
         const isOrderable = p.isVisible && p.quantity > 0;
-        const buttonLabel = isOrderable
-          ? "Order Now"
-          : (p.quantity === 0 ? "Out of Stock" : "Not Available");
+        const buttonLabel = isOrderable ? "Order Now" : (p.quantity === 0 ? "Out of Stock" : "Not Available");
 
         const card = document.createElement("div");
         card.className = `product-card ${isOrderable ? '' : 'disabled'}`;
-
         card.innerHTML = `
-          <img src="${p.imageUrl || "https://via.placeholder.com/250x150"}" 
-               alt="${p.name}" class="product-image">
+          <img src="${p.imageUrl || "https://via.placeholder.com/250x150"}" alt="${p.name}" class="product-image">
           <div class="product-details">
             <h4 class="product-name">${p.name || "Unnamed Product"}</h4>
             <p class="product-price">₱${p.price || 'N/A'}</p>
@@ -106,10 +83,9 @@ onAuthStateChanged(auth, async (user) => {
             <button class="order-btn" ${isOrderable ? "" : "disabled"}>${buttonLabel}</button>
           </div>
         `;
-
         productsDiv.appendChild(card);
 
-        // Attach order modal trigger
+        // Order modal
         const orderBtn = card.querySelector(".order-btn");
         if (isOrderable && orderBtn) {
           orderBtn.addEventListener("click", () => {
@@ -123,10 +99,21 @@ onAuthStateChanged(auth, async (user) => {
           });
         }
       });
+
+      // Search filter
+      if (searchInput) {
+        searchInput.addEventListener("input", () => {
+          const query = searchInput.value.toLowerCase();
+          document.querySelectorAll(".product-card").forEach(card => {
+            const name = card.querySelector(".product-name").textContent.toLowerCase();
+            card.style.display = name.includes(query) ? "flex" : "none";
+          });
+        });
+      }
     });
 
   } catch (err) {
     console.error("Error loading seller/products:", err);
-    productList.innerHTML = "<p>Error loading products.</p>";
+    productsDiv.innerHTML = "<p>Error loading products.</p>";
   }
 });
