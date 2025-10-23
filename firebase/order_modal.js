@@ -10,14 +10,19 @@ import {
 
 export async function openOrderModal({ buyerId, sellerId, productId, productName, price }) {
   let savedAddress = "";
+  let savedPhone = "";
   let productImage = "";
   let productStock = 0;
 
   try {
     const buyerSnap = await getDoc(doc(db, "buyers", buyerId));
-    if (buyerSnap.exists()) savedAddress = buyerSnap.data().address || "";
+    if (buyerSnap.exists()) {
+      const buyerData = buyerSnap.data();
+      savedAddress = buyerData.address || "";
+      savedPhone = buyerData.phone || "";
+    }
   } catch (err) {
-    console.warn("Could not fetch buyer address:", err);
+    console.warn("Could not fetch buyer info:", err);
   }
 
   try {
@@ -26,7 +31,7 @@ export async function openOrderModal({ buyerId, sellerId, productId, productName
       const productData = productSnap.data();
       productImage = productData.imageUrl || "https://via.placeholder.com/250x150";
       productStock = productData.quantity || 0;
-      productName = productData.name || productName; // fallback consistency
+      productName = productData.name || productName;
     }
   } catch (err) {
     console.warn("Could not fetch product image:", err);
@@ -35,17 +40,19 @@ export async function openOrderModal({ buyerId, sellerId, productId, productName
   const modal = document.createElement("div");
   modal.setAttribute("role", "dialog");
   modal.setAttribute("aria-modal", "true");
-  modal.style.position = "fixed";
-  modal.style.inset = "0";
-  modal.style.width = "100%";
-  modal.style.height = "100%";
-  modal.style.background = "rgba(0,0,0,0.5)";
-  modal.style.display = "flex";
-  modal.style.alignItems = "center";
-  modal.style.justifyContent = "center";
-  modal.style.zIndex = "9999";
-  modal.style.padding = "10px";
-  modal.style.overflowY = "auto";
+  Object.assign(modal.style, {
+    position: "fixed",
+    inset: "0",
+    width: "100%",
+    height: "100%",
+    background: "rgba(0,0,0,0.5)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: "9999",
+    padding: "10px",
+    overflowY: "auto"
+  });
 
   modal.innerHTML = `
     <div style="
@@ -89,7 +96,7 @@ export async function openOrderModal({ buyerId, sellerId, productId, productName
     }
   });
 
-  // ✅ Clamp quantity live
+  // Clamp quantity live
   const qtyInput = modal.querySelector("#order-qty");
   qtyInput.addEventListener("input", () => {
     let val = parseInt(qtyInput.value);
@@ -135,10 +142,23 @@ export async function openOrderModal({ buyerId, sellerId, productId, productName
         <h3>Confirm Order</h3>
         <p><strong>Product:</strong> ${productName}</p>
         <p><strong>Quantity:</strong> ${qty}</p>
+
         <label>Delivery Address:</label>
-        <textarea id="order-address" style="width:100%;margin-bottom:10px;font-size:inherit;padding:8px;box-sizing:border-box;min-height:60px;">${safeAddress}</textarea>
+        <textarea id="order-address" maxlength="40"
+          style="width:100%;margin-bottom:10px;font-size:inherit;padding:8px;box-sizing:border-box;min-height:60px;"
+        >${safeAddress}</textarea>
+
+        <label>Phone Number:</label>
+        <input type="tel" id="order-phone" value="${savedPhone}" maxlength="11"
+          style="width:100%;margin-bottom:10px;font-size:inherit;padding:8px;box-sizing:border-box;"
+          placeholder="09XXXXXXXXX"
+          oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+
         <label>Notes (optional):</label>
-        <textarea id="order-notes" style="width:100%;margin-bottom:10px;font-size:inherit;padding:8px;box-sizing:border-box;min-height:60px;"></textarea>
+        <textarea id="order-notes" maxlength="150"
+          style="width:100%;margin-bottom:10px;font-size:inherit;padding:8px;box-sizing:border-box;min-height:60px;"
+        ></textarea>
+
         <div style="text-align:right;">
           <button id="back-step" style="margin-right:10px;min-height:44px;">Back</button>
           <button id="confirm-order" style="background:#1d4ed8;color:white;padding:12px 16px;border:none;border-radius:5px;font-weight:bold;min-height:44px;">Place Order</button>
@@ -156,8 +176,12 @@ export async function openOrderModal({ buyerId, sellerId, productId, productName
       confirmBtn.disabled = true;
       confirmBtn.textContent = "Placing...";
 
-      const address = document.getElementById("order-address").value.trim();
-      const notes = document.getElementById("order-notes").value.trim();
+      let address = document.getElementById("order-address").value.trim();
+      let phone = document.getElementById("order-phone").value.trim();
+      let notes = document.getElementById("order-notes").value.trim();
+
+      // Sanitize phone
+      phone = phone.replace(/\D/g, "");
 
       if (!address) {
         alert("Address is required.");
@@ -165,9 +189,29 @@ export async function openOrderModal({ buyerId, sellerId, productId, productName
         confirmBtn.textContent = "Place Order";
         return;
       }
+      if (address.length > 40) {
+        alert("Address cannot exceed 40 characters.");
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = "Place Order";
+        return;
+      }
+
+      if (!/^09\d{9}$/.test(phone)) {
+        alert("Valid phone number is required (11 digits starting with 09).");
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = "Place Order";
+        return;
+      }
+
+      if (notes.length > 150) {
+        alert("Notes cannot exceed 150 characters.");
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = "Place Order";
+        return;
+      }
 
       try {
-        await createOrder({ buyerId, sellerId, productId, qty, address, notes });
+        await createOrder({ buyerId, sellerId, productId, qty, address, phone, notes });
 
         modal.innerHTML = `
           <div style="
@@ -176,8 +220,6 @@ export async function openOrderModal({ buyerId, sellerId, productId, productName
             border-radius:10px;
             width:100%;
             max-width:400px;
-            box-sizing:border-box;
-            text-align:center;
             font-size:clamp(14px, 2.5vw, 16px);
           ">
             <h3 style="color:green;">✅ Order Placed!</h3>
@@ -199,7 +241,7 @@ export async function openOrderModal({ buyerId, sellerId, productId, productName
 }
 
 // 🔒 Transaction-based order creation
-async function createOrder({ buyerId, sellerId, productId, qty, address, notes }) {
+async function createOrder({ buyerId, sellerId, productId, qty, address, phone, notes }) {
   const productRef = doc(db, `sellers/${sellerId}/products/${productId}`);
   const buyerRef = doc(db, "buyers", buyerId);
   const ordersCol = collection(db, `sellers/${sellerId}/orders`);
@@ -215,9 +257,16 @@ async function createOrder({ buyerId, sellerId, productId, qty, address, notes }
     if (!buyerSnap.exists()) throw new Error("Buyer not found.");
     const buyer = buyerSnap.data();
 
-    // Always update buyer address if changed
+    // Always update buyer address/phone if changed
+    const updates = {};
     if (!buyer.address || buyer.address.trim() !== address.trim()) {
-      transaction.update(buyerRef, { address });
+      updates.address = address;
+    }
+    if (!buyer.phone || buyer.phone.trim() !== phone.trim()) {
+      updates.phone = phone;
+    }
+    if (Object.keys(updates).length > 0) {
+      transaction.update(buyerRef, updates);
     }
 
     // Decrement stock
@@ -229,8 +278,8 @@ async function createOrder({ buyerId, sellerId, productId, qty, address, notes }
       buyerFirstName: buyer.firstName || "",
       buyerLastName: buyer.lastName || "",
       buyerEmail: buyer.email || "",
-      buyerPhone: buyer.phone || "",
-      buyerAddress: address,
+      buyerPhone: phone, // ✅ required phone
+      buyerAddress: address, // ✅ required address
       buyerPhotoURL: buyer.photoURL || "",
       productId,
       productName: product.name || "",

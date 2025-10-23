@@ -119,11 +119,34 @@ export function injectReportModal() {
         };
       }
 
+      // Fetch buyer info (reporter)
+      let buyerInfo = {};
+      if (user) {
+        // Try to get from users collection if exists
+        const buyerRef = doc(db, "users", user.uid);
+        const buyerSnap = await getDoc(buyerRef);
+        if (buyerSnap.exists()) {
+          const data = buyerSnap.data();
+          buyerInfo = {
+            buyerEmail: data.email || user.email || null,
+            buyerFirstName: data.firstName || null,
+            buyerLastName: data.lastName || null
+          };
+        } else {
+          // Fallback to Firebase Auth profile
+          buyerInfo = {
+            buyerEmail: user.email || null,
+            buyerName: user.displayName || null
+          };
+        }
+      }
+
       // Save to Firestore
       await addDoc(collection(db, "sellers", currentSellerId, "reports"), {
         sellerId: currentSellerId,
         ...sellerInfo,
         buyerId: user ? user.uid : null,
+        ...buyerInfo,
         reason,
         description,
         evidence: evidenceUrls,
@@ -162,4 +185,3 @@ export function openReportModal(sellerId) {
   const modal = document.getElementById("reportModal");
   if (modal) modal.style.display = "flex";
 }
-    
