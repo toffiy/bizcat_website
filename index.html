@@ -13,18 +13,22 @@
   <header class="marketplace-header">
     <div class="header-left">
       <h1 class="marketplace-title">MarketPlace</h1>
-   
     </div>
     <div class="header-right">
       <div id="welcomeText">
         <span class="welcome-label">Welcome</span>
         <span id="welcome-name">name</span>
       </div>
+
+      <!-- 🔔 Notification Button -->
+      <button id="notifBtn" class="notif-btn" aria-label="Notifications">
+        🔔
+        <span id="notifBadge" class="notif-badge hidden">0</span>
+      </button>
+
       <div class="menu-container">
         <button id="menuBtn" class="menu-btn" aria-label="Menu">
-          <span></span>
-          <span></span>
-          <span></span>
+          <span></span><span></span><span></span>
         </button>
         <ul class="menu-dropdown">
           <li><a href="profile.html">Profile</a></li>
@@ -34,22 +38,37 @@
       </div>
     </div>
   </header>
-
-  <div class="page-container">
-  <!-- Leaderboard -->
-  <section class="leaderboard-section">
-    <h2 id="leadearboard_title" h2 class="section-title">Top Sellers Leaderboard</h2>
-    <div id="leaderboardContainer" class="leaderboard-grid"></div>
-      
-  </section>
-
-  <!-- Sellers List -->
-  <section class="sellers-section">
-    <h2 id="sellersCount" class="section-title">Sellers (0)</h2>
-    <div id="sellerListContainer" class="seller-list-grid"></div>
-  </section>
+<!-- 🚨 Block Screen Overlay -->
+<div id="blockScreen" class="block-screen hidden">
+  <div class="block-content">
+    <h2>🚫 Account Suspended</h2>
+    <p>Your account has been suspended. Please contact support if you believe this is a mistake.</p>
+    <button id="backToLoginBtn" class="block-btn">Go Back to Login</button>
+  </div>
 </div>
 
+  <!-- 🔹 Floating Notification Window -->
+  <div id="notifWindow" class="notif-window hidden">
+    <div class="notif-header">
+      <h3>Notifications</h3>
+      <button id="closeNotifBtn" class="close-btn">✖</button>
+    </div>
+    <ul id="notifList" class="notif-list"></ul>
+  </div>
+
+  <div class="page-container">
+    <!-- Leaderboard -->
+    <section class="leaderboard-section">
+      <h2 id="leadearboard_title" class="section-title">Top Sellers Leaderboard</h2>
+      <div id="leaderboardContainer" class="leaderboard-grid"></div>
+    </section>
+
+    <!-- Sellers List -->
+    <section class="sellers-section">
+      <h2 id="sellersCount" class="section-title">Sellers (0)</h2>
+      <div id="sellerListContainer" class="seller-list-grid"></div>
+    </section>
+  </div>
 
   <script type="module" src="./firebase/seller_catalog.js"></script>
   <script>

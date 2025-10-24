@@ -38,6 +38,7 @@ export async function openOrderModal({ buyerId, sellerId, productId, productName
   }
 
   const modal = document.createElement("div");
+  modal.id = "orderModal"; // 👈 important for suspension close
   modal.setAttribute("role", "dialog");
   modal.setAttribute("aria-modal", "true");
   Object.assign(modal.style, {
@@ -180,7 +181,6 @@ export async function openOrderModal({ buyerId, sellerId, productId, productName
       let phone = document.getElementById("order-phone").value.trim();
       let notes = document.getElementById("order-notes").value.trim();
 
-      // Sanitize phone
       phone = phone.replace(/\D/g, "");
 
       if (!address) {
@@ -219,7 +219,7 @@ export async function openOrderModal({ buyerId, sellerId, productId, productName
             padding:20px;
             border-radius:10px;
             width:100%;
-            max-width:400px;
+                        max-width:400px;
             font-size:clamp(14px, 2.5vw, 16px);
           ">
             <h3 style="color:green;">✅ Order Placed!</h3>
@@ -278,8 +278,8 @@ async function createOrder({ buyerId, sellerId, productId, qty, address, phone, 
       buyerFirstName: buyer.firstName || "",
       buyerLastName: buyer.lastName || "",
       buyerEmail: buyer.email || "",
-      buyerPhone: phone, // ✅ required phone
-      buyerAddress: address, // ✅ required address
+      buyerPhone: phone,
+      buyerAddress: address,
       buyerPhotoURL: buyer.photoURL || "",
       productId,
       productName: product.name || "",
@@ -293,4 +293,12 @@ async function createOrder({ buyerId, sellerId, productId, qty, address, phone, 
       lastUpdated: serverTimestamp()
     });
   });
+}
+
+// 👇 Exported so catalog.js can close the modal if suspended
+export function closeOrderModal() {
+  const modal = document.getElementById("orderModal");
+  if (modal) {
+    modal.remove();
+  }
 }

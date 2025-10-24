@@ -1,7 +1,8 @@
+// catalog.js
 import { auth, db } from './firebase_config.js';
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 import { doc, getDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-import { openOrderModal } from './order_modal.js';
+import { openOrderModal, closeOrderModal } from './order_modal.js'; // 👈 import both
 import { injectReportModal, openReportModal } from './report_modal.js';
 
 const sellerNameEl = document.getElementById("sellerName");
@@ -14,7 +15,7 @@ const searchInput = document.getElementById("productSearch");
 const urlParams = new URLSearchParams(window.location.search);
 const sellerId = urlParams.get("seller");
 
-// Inject modal once
+// Inject report modal once
 injectReportModal();
 
 onAuthStateChanged(auth, async (user) => {
@@ -23,6 +24,18 @@ onAuthStateChanged(auth, async (user) => {
     window.location.href = `login.html?redirect=${encodeURIComponent(currentUrl)}`;
     return;
   }
+
+  // 🔒 Real-time suspension detection
+  const buyerDocRef = doc(db, "buyers", user.uid);
+  onSnapshot(buyerDocRef, (buyerSnap) => {
+    if (buyerSnap.exists()) {
+      const buyer = buyerSnap.data();
+      if (buyer.status === "suspended") {
+        showBlockScreen();
+      }
+    }
+  });
+
   if (!sellerId) {
     productsDiv.innerHTML = "<p>No seller selected.</p>";
     return;
@@ -117,3 +130,23 @@ onAuthStateChanged(auth, async (user) => {
     productsDiv.innerHTML = "<p>Error loading products.</p>";
   }
 });
+
+// 🔒 Block screen helper
+function showBlockScreen() {
+  const blockScreen = document.getElementById("blockScreen");
+  if (blockScreen) {
+    blockScreen.classList.remove("hidden");
+    document.body.style.overflow = "hidden";
+
+    // 👇 Close any open order modal
+    closeOrderModal();
+
+    const backBtn = document.getElementById("backToLoginBtn");
+    if (backBtn) {
+      backBtn.addEventListener("click", async () => {
+        await signOut(auth);
+        window.location.href = "login.html";
+      });
+    }
+  }
+}
