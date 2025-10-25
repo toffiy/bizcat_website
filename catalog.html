@@ -21,6 +21,8 @@
   <section class="seller-profile">
     <h2 id="sellerName">Seller Name</h2>
     <p id="sellerEmail">Email: example@email.com</p>
+    <!-- 🔴 Live button placeholder -->
+    <div id="live-container"></div>
   </section>
 
   <!-- Search Bar -->
@@ -35,14 +37,15 @@
       <em>Loading products...</em>
     </div>
   </section>
-<!-- 🚨 Block Screen Overlay -->
-<div id="blockScreen" class="block-screen hidden">
-  <div class="block-content">
-    <h2>🚫 Account Suspended</h2>
-    <p>Your account has been suspended. Please contact support if you believe this is a mistake.</p>
-    <button id="backToLoginBtn" class="block-btn">Go Back to Login</button>
+
+  <!-- 🚨 Block Screen Overlay -->
+  <div id="blockScreen" class="block-screen hidden">
+    <div class="block-content">
+      <h2>🚫 Account Suspended</h2>
+      <p>Your account has been suspended. Please contact support if you believe this is a mistake.</p>
+      <button id="backToLoginBtn" class="block-btn">Go Back to Login</button>
+    </div>
   </div>
-</div>
 
   <!-- Firebase Catalog Script -->
   <script type="module" src="./firebase/product_catalog.js"></script>
